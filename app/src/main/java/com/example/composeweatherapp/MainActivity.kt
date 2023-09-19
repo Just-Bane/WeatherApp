@@ -68,6 +68,8 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// smth
+
 
 @Composable
 fun MyWeatherApp(modifier: Modifier) {
