@@ -1,15 +1,13 @@
 package com.example.composeweatherapp
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.VectorConverter
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,12 +18,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,12 +35,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -52,11 +46,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.res.ResourcesCompat.ThemeCompat
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.ui.theme.backgroundColor
 import com.example.composeweatherapp.ui.theme.boxesColor
+import dagger.hilt.android.AndroidEntryPoint
+import java.text.SimpleDateFormat
+import java.util.Date
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,16 +66,29 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// smth
-
-
+@SuppressLint("SimpleDateFormat")
 @Composable
 fun MyWeatherApp(modifier: Modifier) {
+
+    val gradientColorList = listOf(
+        Color(0xFFFBAB7E),
+        Color(0xFFF7CE68)
+    )
+
+    val sdf = SimpleDateFormat("dd.MM")
+
     Surface(
         modifier.fillMaxSize()
     ) {
-        Column(Modifier.background(backgroundColor)) {
-            LocationSection(city = "Berdychiv", time = "19 September")
+        Column(
+            Modifier.background(
+                GradientBackgroundBrush(
+                    isVerticalGradient = true,
+                    colors = gradientColorList
+                )
+            )
+        ) {
+            LocationSection(city = "Berdychiv", time = sdf.format(Date()))
             TemperatureSection(temperature = "19 °C")
             BoxesSection(wind = "19km/h", humidity = "64%", clouds = "overcast clouds")
         }
@@ -126,7 +137,7 @@ fun TemperatureSection(temperature: String) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.cludy),
+                painter = painterResource(id = R.drawable.weather_icon),
                 contentDescription = null,
                 tint = Color.Unspecified,
                 modifier = Modifier.size(width = 200.dp, height = 200.dp)
@@ -199,8 +210,10 @@ fun BoxesSection(wind: String, humidity: String, clouds: String) {
                     .padding()
                     .background(color = boxesColor, shape = RoundedCornerShape(16.dp))
             ) {
-                Row(Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,) {
+                Row(
+                    Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Box(
                         Modifier
                             .background(
@@ -240,8 +253,10 @@ fun BoxesSection(wind: String, humidity: String, clouds: String) {
                     .padding()
                     .background(color = boxesColor, shape = RoundedCornerShape(16.dp))
             ) {
-                Row(Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,) {
+                Row(
+                    Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Box(
                         Modifier
                             .background(
@@ -285,6 +300,19 @@ fun MyWeatherAppPreview() {
     ComposeWeatherAppTheme {
         MyWeatherApp(modifier = Modifier)
     }
+}
+
+@Composable
+fun GradientBackgroundBrush(
+    isVerticalGradient: Boolean,
+    colors: List<Color>
+): Brush {
+    val endOffset = if (isVerticalGradient) {
+        Offset(0f, Float.POSITIVE_INFINITY)
+    } else {
+        Offset(Float.POSITIVE_INFINITY, 0f)
+    }
+    return Brush.linearGradient(colors = colors, start = Offset.Zero, end = endOffset)
 }
 
 
