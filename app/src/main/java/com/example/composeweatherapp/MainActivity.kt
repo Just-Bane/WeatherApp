@@ -27,6 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.composeweatherapp.ui.first.FirstScreenCheck
+import com.example.composeweatherapp.ui.first.PrintCitySection
 import com.example.composeweatherapp.ui.main.MainScreen
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.usecase.RequestUseCase
@@ -42,10 +44,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestUC.subscribe(this, this)
+        requestUC.subscribe(this)
         requestUC.getLocation()
         setContent {
             ComposeWeatherAppTheme {
+//                ThirdScreen(modifier = Modifier)
+//                FirstScreenCheck(modifier = Modifier)
                 MainScreen(modifier = Modifier)
             }
         }

@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">ComposeWeatherApp</string>
+    <string name="degrees">%s °C</string>
+
+    <string name="wind">Wind</string>
+    <string name="speed">%s km/h</string>
+
+    <string name="humid">Humidity</string>
+    <string name="percent">%s %</string>
+
+    <string name="clouds">Clouds</string>
+
+    <string name="city">City</string>
+    <string name="lat">Latitude</string>
+    <string name="lon">Longitude</string>
 </resources>

@@ -13,7 +13,8 @@ import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 class RequestUseCase @Inject constructor(
-    private val weatherRepo: WeatherRepository
+    private val weatherRepo: WeatherRepository,
+    private val context: Context
 ) {
 
     companion object {
@@ -22,24 +23,21 @@ class RequestUseCase @Inject constructor(
 
     private var fusedLocationProviderClient: FusedLocationProviderClient? = null
 
-    private var _context: WeakReference<Context>? = null
-
     private var _activity: WeakReference<MainActivity>? = null
 
-    fun subscribe(activity: MainActivity, context: Context) {
+    fun subscribe(activity: MainActivity) {
         _activity = WeakReference(activity)
-        _context = WeakReference(context)
     }
 
     fun getLocation() {
         fusedLocationProviderClient = _activity?.get()
             ?.let { LocationServices.getFusedLocationProviderClient(it) }
-        if (_context?.get()?.let {
+        if (context.let {
                 ActivityCompat.checkSelfPermission(
                     it,
                     Manifest.permission.ACCESS_FINE_LOCATION
                 )
-            } != PackageManager.PERMISSION_GRANTED && _context?.get()?.let {
+            } != PackageManager.PERMISSION_GRANTED && context.let {
                 ActivityCompat.checkSelfPermission(
                     it,
                     Manifest.permission.ACCESS_COARSE_LOCATION

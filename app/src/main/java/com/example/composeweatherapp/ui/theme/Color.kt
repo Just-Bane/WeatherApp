@@ -10,5 +10,9 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-val backgroundColor = Color(0xfffdbda1)
 val boxesColor = Color(0x5CFFFFFF)
+
+val gradientColorList = listOf(
+    Color(0xFFFBAB7E),
+    Color(0xFFF7CE68)
+)

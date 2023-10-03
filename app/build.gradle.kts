@@ -60,11 +60,16 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.0.1")
     kapt("com.google.dagger:hilt-compiler:2.46.1")
 
+    implementation("androidx.navigation:navigation-compose:2.7.3")
+
     implementation("androidx.room:room-ktx:2.5.2")
     annotationProcessor("androidx.room:room-compiler:2.5.2")
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    implementation("androidx.compose.foundation:foundation:1.5.2")
+    implementation("androidx.compose.material:material:1.5.2")
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")

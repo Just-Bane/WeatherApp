@@ -1,24 +1,25 @@
-package com.example.composeweatherapp.ui.main
+package com.example.composeweatherapp.ui.third
 
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.composeweatherapp.repository.WeatherRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
+import com.example.composeweatherapp.usecase.DateUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class LocationViewModel @Inject constructor(
+    private val date: DateUseCase,
     private val weatherRepo: WeatherRepository
-) : ViewModel() {
+): ViewModel() {
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
+    val currentDate: String = date.getDate().format(Date())
 
     init {
         viewModelScope.launch {
