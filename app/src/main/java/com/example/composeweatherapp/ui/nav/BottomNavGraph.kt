@@ -6,9 +6,11 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.composeweatherapp.ui.first.CityScreen
-import com.example.composeweatherapp.ui.second.HomeScreen
-import com.example.composeweatherapp.ui.third.LocationScreen
+import com.example.composeweatherapp.ui.screens.first.CityScreen
+import com.example.composeweatherapp.ui.screens.first.CityViewModel
+import com.example.composeweatherapp.ui.screens.internet.InternetScreen
+import com.example.composeweatherapp.ui.screens.second.HomeScreen
+import com.example.composeweatherapp.ui.screens.third.LocationScreen
 
 @Composable
 fun BottomNavGraph(navController: NavHostController) {
@@ -21,6 +23,9 @@ fun BottomNavGraph(navController: NavHostController) {
         }
         composable(route = BottomBarScreen.Location.route) {
             LocationScreen(modifier = Modifier)
+        }
+        composable("internet") {
+            InternetScreen(modifier = Modifier)
         }
     }
 }

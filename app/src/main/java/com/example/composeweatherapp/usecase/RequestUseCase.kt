@@ -3,6 +3,7 @@ package com.example.composeweatherapp.usecase
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import com.example.composeweatherapp.MainActivity
 import com.example.composeweatherapp.core.roundTo

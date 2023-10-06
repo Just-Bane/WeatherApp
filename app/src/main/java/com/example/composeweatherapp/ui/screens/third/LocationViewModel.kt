@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.ui.third
+package com.example.composeweatherapp.ui.screens.third
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel

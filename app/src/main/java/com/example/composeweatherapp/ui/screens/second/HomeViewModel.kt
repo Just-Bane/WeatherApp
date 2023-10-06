@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.ui.second
+package com.example.composeweatherapp.ui.screens.second
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -82,10 +82,10 @@ class HomeViewModel @Inject constructor(
                 screenState.value = SecondScreenState.WrongPassword()
             }
             is SecondScreenIntent.LoginIntent -> {
-                TODO()
+                // smth
             }
             SecondScreenIntent.RetryIntent -> {
-                TODO()
+                // smth
             }
         }
     }

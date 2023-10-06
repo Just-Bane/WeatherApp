@@ -1,18 +1,26 @@
-package com.example.composeweatherapp.ui.first
+package com.example.composeweatherapp.ui.screens.first
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,17 +34,45 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
-import com.example.composeweatherapp.ui.main.BoxesSection
-import com.example.composeweatherapp.ui.main.GradientBackgroundBrush
-import com.example.composeweatherapp.ui.main.LocationSection
-import com.example.composeweatherapp.ui.main.TemperatureSection
-import com.example.composeweatherapp.ui.main.WeatherUIData
+import com.example.composeweatherapp.ui.screens.main.BoxesSection
+import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
+import com.example.composeweatherapp.ui.screens.main.LocationSection
+import com.example.composeweatherapp.ui.screens.main.TemperatureSection
+import com.example.composeweatherapp.ui.screens.main.WeatherUIData
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.ui.theme.gradientColorList
 
 @Composable
-fun CityScreen(
+fun CityScreen(modifier: Modifier) {
+    val cityViewModel: CityViewModel = hiltViewModel()
+
+    val navController = rememberNavController()
+
+    when (cityViewModel.screenState.value) {
+        is CityViewModel.CityScreenState.WriteTheCity -> {
+            CityScreenUI(modifier = Modifier)
+        }
+
+        CityViewModel.CityScreenState.CorrectCityWritten -> {
+            CityScreenUI(modifier = Modifier)
+        }
+
+        CityViewModel.CityScreenState.WrongCityWritten -> {
+            CityScreenUI(modifier = Modifier)
+            EnableDialog()
+        }
+
+        CityViewModel.CityScreenState.NoInternet -> {
+            navController.navigate("internet")
+        }
+    }
+}
+
+
+@Composable
+fun CityScreenUI(
     modifier: Modifier
 ) {
     val cityViewModel: CityViewModel = hiltViewModel()
@@ -84,6 +120,38 @@ fun CityScreen(
             )
             PrintCitySection()
         }
+    }
+}
+
+@Composable
+fun EnableDialog() {
+    val openDialog = rememberSaveable {
+        mutableStateOf(true)
+    }
+    openDialog.value = true
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = { openDialog.value = false },
+            confirmButton = {
+                TextButton(
+                    onClick = { openDialog.value = false }
+                ) {
+                    Text("Ok")
+                }
+            },
+            text = {
+                Row(modifier = Modifier) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = 8.dp),
+                        text = "This city does not exist"
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -135,6 +203,10 @@ fun FirstScreenCheck(modifier: Modifier) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrintCitySection() {
+
+    val cityViewModel: CityViewModel = hiltViewModel()
+
+
     Box(
         modifier = Modifier
             .padding(vertical = 20.dp)
@@ -145,6 +217,7 @@ fun PrintCitySection() {
             mutableStateOf("")
         }
         TextField(modifier = Modifier,
+            shape = RoundedCornerShape(20.dp),
             value = text,
             onValueChange = { newText ->
                 text = newText
@@ -152,16 +225,20 @@ fun PrintCitySection() {
             label = {
                 Text(text = "City")
             },
-            colors = TextFieldDefaults.textFieldColors(
-
-            ),
+            trailingIcon = {
+                IconButton(onClick = {
+                    cityViewModel.proceedIntent(CityViewModel.CityScreenIntent.GetWeatherIntent, text)
+                }) {
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Done
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    // request
+                    cityViewModel.proceedIntent(CityViewModel.CityScreenIntent.GetWeatherIntent, text)
                 }
             )
         )

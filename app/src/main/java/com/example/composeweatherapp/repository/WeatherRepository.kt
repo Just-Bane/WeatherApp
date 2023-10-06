@@ -28,10 +28,20 @@ class WeatherRepository @Inject constructor(
     val weatherUIFlow: MutableStateFlow<CurrentWeatherData?> = MutableStateFlow(null)
 
     private var data: CurrentWeatherData? = null
+
     var locationLat: String? = null
     var locationLon: String? = null
 
-    private var updateStep = 0
+    var locUpdate: Boolean = false
+    var cityUpdate: Boolean = false
+
+    var lat: String? = null
+    var lon: String? = null
+    var city: String? = null
+
+    var updateStep = 0
+
+    var locationTimeout: Int = 0
 
     private var firstDownload: Boolean = true
 
@@ -42,11 +52,15 @@ class WeatherRepository @Inject constructor(
                 if (firstDownload) {
                     while (locationLat == null) {
                         delay(100)
+                        locationTimeout += 1
+                        if (locationTimeout == 20) {
+                            locationLat = "no_location"
+                        }
                     }
                     firstDownload = false
                 }
                 updateStep++
-                if (locationLat == "no_location" && locationLon == "no_location") {
+                if (locationLat == "no_location") {
                     data = CurrentWeatherData(
                         name = "No_location",
                         temp = "-",
@@ -54,8 +68,13 @@ class WeatherRepository @Inject constructor(
                         humidity = "-",
                         description = "no_loc"
                     )
+                } else if (city != null && cityUpdate) {
+                    data = getCurrentWeatherCity(city!!)
+                } else if (lat != null && lon != null && locUpdate) {
+                    data = getCurrentWeather(lat!!, lon!!)
+                } else {
+                    data = getCurrentWeather(locationLat!!, locationLon!!)
                 }
-                data = getCurrentWeather(locationLat!!, locationLon!!)
                 weatherUIFlow.emit(data)
                 Log.e("flow", "emited data $data")
                 delay(3_000)
@@ -64,13 +83,38 @@ class WeatherRepository @Inject constructor(
     }
 
 
-    private suspend fun getCurrentWeather(
+    suspend fun getCurrentWeather(
         lat: String,
         lon: String
     ): CurrentWeatherData = withContext(Dispatchers.IO) {
         val response = retrofit.api.getCurrentWeather(
             lat = lat,
             lon = lon,
+            appid = apiKey
+        )
+        return@withContext response.body()?.let { data ->
+            CurrentWeatherData(
+                temp = Math.round((data.main.temp).toDouble()).toString(),
+                name = data.name + " " + updateStep,
+                humidity = data.main.humidity,
+                description = data.weather[0].description,
+                speed = data.wind.speed,
+
+                )
+        } ?: CurrentWeatherData(
+            name = "NO_DATA",
+            temp = "NO_DATA",
+            humidity = "NO_DATA",
+            description = "NO_DATA",
+            speed = "NO_DATA"
+        )
+    }
+
+    suspend fun getCurrentWeatherCity(
+        city: String
+    ): CurrentWeatherData = withContext(Dispatchers.IO) {
+        val response = retrofit.api.getCurrentWeatherCity(
+            city = city,
             appid = apiKey
         )
         return@withContext response.body()?.let { data ->

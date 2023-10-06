@@ -12,4 +12,11 @@ interface WeatherAPI {
         @Query("units") units: String = "metric",
         @Query("appid") appid: String,
     ): Response<WeatherData>
+
+    @GET("weather")
+    suspend fun getCurrentWeatherCity(
+        @Query("q") city: String,
+        @Query("units") units: String = "metric",
+        @Query("appid") appid: String,
+    ): Response<WeatherData>
 }

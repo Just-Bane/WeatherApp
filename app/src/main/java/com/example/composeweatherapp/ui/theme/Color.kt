@@ -12,6 +12,8 @@ val Pink40 = Color(0xFF7D5260)
 
 val boxesColor = Color(0x5CFFFFFF)
 
+val bottomBarColor = Color(0xFFF0DB98)
+
 val gradientColorList = listOf(
     Color(0xFFFBAB7E),
     Color(0xFFF7CE68)

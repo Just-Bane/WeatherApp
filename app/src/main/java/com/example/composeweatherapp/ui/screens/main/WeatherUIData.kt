@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.ui.main
+package com.example.composeweatherapp.ui.screens.main
 
 import androidx.annotation.DrawableRes
 

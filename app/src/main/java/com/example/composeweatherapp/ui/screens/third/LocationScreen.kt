@@ -1,14 +1,21 @@
-package com.example.composeweatherapp.ui.third
+package com.example.composeweatherapp.ui.screens.third
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -20,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -27,11 +35,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.composeweatherapp.R
-import com.example.composeweatherapp.ui.main.BoxesSection
-import com.example.composeweatherapp.ui.main.GradientBackgroundBrush
-import com.example.composeweatherapp.ui.main.LocationSection
-import com.example.composeweatherapp.ui.main.TemperatureSection
-import com.example.composeweatherapp.ui.main.WeatherUIData
+import com.example.composeweatherapp.ui.screens.main.BoxesSection
+import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
+import com.example.composeweatherapp.ui.screens.main.LocationSection
+import com.example.composeweatherapp.ui.screens.main.TemperatureSection
+import com.example.composeweatherapp.ui.screens.main.WeatherUIData
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.ui.theme.gradientColorList
 
@@ -98,58 +106,72 @@ fun PrintLatLonSection() {
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        var textLat by rememberSaveable {
-            mutableStateOf("")
-        }
-        var textLon by rememberSaveable {
-            mutableStateOf("")
-        }
-
-        TextField(modifier = Modifier,
-            value = textLat,
-            onValueChange = { newText ->
-                textLat = newText
-            },
-            label = {
-                Text(text = context.getString(R.string.lat))
-            },
-            colors = TextFieldDefaults.textFieldColors(
-
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    // request
+        Row(modifier = Modifier,
+            verticalAlignment = Alignment.CenterVertically) {
+            Column(
+                modifier = Modifier.padding(end = 8.dp),
+            ) {
+                var textLat by rememberSaveable {
+                    mutableStateOf("")
                 }
-            )
-        )
-        Spacer(Modifier.height(8.dp))
-
-        TextField(modifier = Modifier,
-            value = textLon,
-            onValueChange = { newText ->
-                textLon = newText
-            },
-            label = {
-                Text(text = context.getString(R.string.lon))
-            },
-            colors = TextFieldDefaults.textFieldColors(
-
-            ),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    // request
+                var textLon by rememberSaveable {
+                    mutableStateOf("")
                 }
-            )
-        )
+                TextField(modifier = Modifier,
+                    value = textLat,
+                    onValueChange = { newText ->
+                        textLat = newText
+                    },
+                    label = {
+                        Text(text = context.getString(R.string.lat))
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            // request
+                        }
+                    )
+                )
+                Spacer(Modifier.height(8.dp))
+                TextField(modifier = Modifier,
+                    value = textLon,
+                    onValueChange = { newText ->
+                        textLon = newText
+                    },
+                    label = {
+                        Text(text = context.getString(R.string.lon))
+                    },
+                    colors = TextFieldDefaults.textFieldColors(
+
+                    ),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            // request
+                        }
+                    )
+                )
+            }
+            IconButton(
+                onClick = {
+                    // request
+                },
+                modifier = Modifier.background(color = Color.White,
+                    shape = RoundedCornerShape(12.dp)
+                )
+            ) {
+                Icon(imageVector = Icons.Default.Search, contentDescription = null)
+            }
+        }
     }
 }
 

@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.ui.second
+package com.example.composeweatherapp.ui.screens.second
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -12,11 +12,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.composeweatherapp.R
-import com.example.composeweatherapp.ui.main.BoxesSection
-import com.example.composeweatherapp.ui.main.GradientBackgroundBrush
-import com.example.composeweatherapp.ui.main.LocationSection
-import com.example.composeweatherapp.ui.main.TemperatureSection
-import com.example.composeweatherapp.ui.main.WeatherUIData
+import com.example.composeweatherapp.ui.screens.main.BoxesSection
+import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
+import com.example.composeweatherapp.ui.screens.main.LocationSection
+import com.example.composeweatherapp.ui.screens.main.TemperatureSection
+import com.example.composeweatherapp.ui.screens.main.WeatherUIData
 import com.example.composeweatherapp.ui.theme.gradientColorList
 
 @Composable
