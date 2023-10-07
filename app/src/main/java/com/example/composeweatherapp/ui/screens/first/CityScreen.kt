@@ -57,6 +57,7 @@ fun CityScreen(modifier: Modifier) {
 
         CityViewModel.CityScreenState.CorrectCityWritten -> {
             CityScreenUI(modifier = Modifier)
+            cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
         }
 
         CityViewModel.CityScreenState.WrongCityWritten -> {
@@ -125,16 +126,25 @@ fun CityScreenUI(
 
 @Composable
 fun EnableDialog() {
+
+    val cityViewModel: CityViewModel = hiltViewModel()
+
     val openDialog = rememberSaveable {
         mutableStateOf(true)
     }
     openDialog.value = true
     if (openDialog.value) {
         AlertDialog(
-            onDismissRequest = { openDialog.value = false },
+            onDismissRequest = {
+                openDialog.value = false
+                cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
+            },
             confirmButton = {
                 TextButton(
-                    onClick = { openDialog.value = false }
+                    onClick = {
+                        openDialog.value = false
+                        cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
+                    }
                 ) {
                     Text("Ok")
                 }
@@ -227,7 +237,10 @@ fun PrintCitySection() {
             },
             trailingIcon = {
                 IconButton(onClick = {
-                    cityViewModel.proceedIntent(CityViewModel.CityScreenIntent.GetWeatherIntent, text)
+                    cityViewModel.proceedIntent(
+                        CityViewModel.CityScreenIntent.GetWeatherIntent,
+                        text
+                    )
                 }) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = null)
                 }
@@ -238,7 +251,10 @@ fun PrintCitySection() {
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    cityViewModel.proceedIntent(CityViewModel.CityScreenIntent.GetWeatherIntent, text)
+                    cityViewModel.proceedIntent(
+                        CityViewModel.CityScreenIntent.GetWeatherIntent,
+                        text
+                    )
                 }
             )
         )
