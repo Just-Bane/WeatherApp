@@ -21,14 +21,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -43,14 +49,19 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
+import com.example.composeweatherapp.core.CITY_SCREEN
+import com.example.composeweatherapp.core.LOCATION_SCREEN
 import com.example.composeweatherapp.ui.nav.BottomBarScreen
 import com.example.composeweatherapp.ui.nav.BottomNavGraph
+import com.example.composeweatherapp.ui.screens.first.CityViewModel
+import com.example.composeweatherapp.ui.screens.third.LocationViewModel
 import com.example.composeweatherapp.ui.theme.bottomBarColor
 import com.example.composeweatherapp.ui.theme.boxesColor
 
@@ -157,6 +168,60 @@ fun BoxesSection(weatherUIData: List<WeatherUIData>) {
                 BoxWithWeather(dataWeather = weatherUIData[it])
             }
         }
+    }
+}
+
+@Composable
+fun EnableDialog(screen: String) {
+
+    val cityViewModel: CityViewModel = hiltViewModel()
+    val locationViewModel: LocationViewModel = hiltViewModel()
+
+    val openDialog = rememberSaveable {
+        mutableStateOf(true)
+    }
+    openDialog.value = true
+    if (openDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                openDialog.value = false
+                when (screen) {
+                    CITY_SCREEN -> cityViewModel.screenState.value =
+                        CityViewModel.CityScreenState.WriteTheCity
+
+                    LOCATION_SCREEN -> locationViewModel.screenState.value =
+                        LocationViewModel.LocationScreenState.WriteTheLocation
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openDialog.value = false
+                        when (screen) {
+                            CITY_SCREEN -> cityViewModel.screenState.value =
+                                CityViewModel.CityScreenState.WriteTheCity
+
+                            LOCATION_SCREEN -> locationViewModel.screenState.value =
+                                LocationViewModel.LocationScreenState.WriteTheLocation
+                        }
+                    }
+                ) {
+                    Text("Ok")
+                }
+            },
+            text = {
+                Row(modifier = Modifier) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null
+                    )
+                    Text(
+                        modifier = Modifier.padding(start = 8.dp),
+                        text = "This city does not exist"
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -284,12 +349,14 @@ fun RowScope.AddItem(
             Icon(imageVector = screen.icon, contentDescription = "Navigation Icon")
         },
         label = {
-            Text(text = screen.title,
+            Text(
+                text = screen.title,
                 style = TextStyle(
                     fontFamily = fontFamily,
                     fontWeight = FontWeight.Medium,
                     color = Color.Black
-                ))
+                )
+            )
         },
         selectedContentColor = Color.Black,
         unselectedContentColor = Color.Black.copy(0.4f),
@@ -308,3 +375,5 @@ fun RowScope.AddItem(
         }
     )
 }
+
+

@@ -17,9 +17,12 @@ import javax.inject.Inject
 class LocationViewModel @Inject constructor(
     private val date: DateUseCase,
     private val weatherRepo: WeatherRepository
-): ViewModel() {
+) : ViewModel() {
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate().format(Date())
+
+    var _lat: String? = null
+    var _lon: String? = null
 
     init {
         viewModelScope.launch {
@@ -31,5 +34,44 @@ class LocationViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    sealed class LocationScreenState {
+        object WriteTheLocation : LocationScreenState()
+        object CorrectLocationWritten : LocationScreenState()
+        object WrongLocationWritten : LocationScreenState()
+        object NoInternet : LocationScreenState()
+    }
+
+    sealed class LocationScreenIntent {
+        object GetTheWeatherIntent: LocationScreenIntent()
+    }
+
+    val screenState = mutableStateOf<LocationScreenState>(LocationScreenState.WriteTheLocation)
+
+    fun proceedIntent(intent: LocationScreenIntent, lat: String, lon: String) {
+        when (intent) {
+            LocationScreenIntent.GetTheWeatherIntent -> {
+                viewModelScope.launch {
+                    val weatherData = weatherRepo.getCurrentWeather(lat, lon)
+                    if (weatherData.name == "NO_DATA") {
+                        screenState.value = LocationScreenState.WrongLocationWritten
+                    } else {
+                        weather.value = weatherData
+                        screenState.value = LocationScreenState.CorrectLocationWritten
+                        updatePrefLoc(lat, lon)
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updatePrefLoc(lat: String, lon: String) {
+        _lat = lat
+        _lon = lon
+        weatherRepo.lat = lat
+        weatherRepo.lon = lon
+        weatherRepo.locUpdate = true
+        weatherRepo.cityUpdate = false
     }
 }

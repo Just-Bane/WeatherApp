@@ -34,8 +34,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
+import com.example.composeweatherapp.core.LOCATION_SCREEN
 import com.example.composeweatherapp.ui.screens.main.BoxesSection
+import com.example.composeweatherapp.ui.screens.main.EnableDialog
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
 import com.example.composeweatherapp.ui.screens.main.TemperatureSection
@@ -44,7 +47,36 @@ import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.ui.theme.gradientColorList
 
 @Composable
-fun LocationScreen(
+fun LocationScreen(modifier: Modifier) {
+    val locationViewModel: LocationViewModel = hiltViewModel()
+
+    val navController = rememberNavController()
+
+    when (locationViewModel.screenState.value) {
+        LocationViewModel.LocationScreenState.WriteTheLocation -> {
+            LocationScreenUI(modifier = Modifier)
+        }
+
+        LocationViewModel.LocationScreenState.CorrectLocationWritten -> {
+            LocationScreenUI(modifier = Modifier)
+            locationViewModel.screenState.value =
+                LocationViewModel.LocationScreenState.WriteTheLocation
+        }
+
+        LocationViewModel.LocationScreenState.WrongLocationWritten -> {
+            LocationScreenUI(modifier = Modifier)
+            EnableDialog(LOCATION_SCREEN)
+        }
+
+        LocationViewModel.LocationScreenState.NoInternet -> {
+            navController.navigate("internet")
+        }
+    }
+}
+
+
+@Composable
+fun LocationScreenUI(
     modifier: Modifier
 ) {
     val locationViewModel: LocationViewModel = hiltViewModel()
@@ -95,28 +127,33 @@ fun LocationScreen(
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PrintLatLonSection() {
 
     val context = LocalContext.current
 
+    val locationViewModel: LocationViewModel = hiltViewModel()
+
     Column(
         modifier = Modifier
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(modifier = Modifier,
-            verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            var textLat by rememberSaveable {
+                mutableStateOf("")
+            }
+            var textLon by rememberSaveable {
+                mutableStateOf("")
+            }
             Column(
                 modifier = Modifier.padding(end = 8.dp),
             ) {
-                var textLat by rememberSaveable {
-                    mutableStateOf("")
-                }
-                var textLon by rememberSaveable {
-                    mutableStateOf("")
-                }
                 TextField(modifier = Modifier,
                     value = textLat,
                     onValueChange = { newText ->
@@ -129,8 +166,8 @@ fun PrintLatLonSection() {
 
                     ),
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Done
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
@@ -151,8 +188,8 @@ fun PrintLatLonSection() {
 
                     ),
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Done
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
@@ -163,9 +200,14 @@ fun PrintLatLonSection() {
             }
             IconButton(
                 onClick = {
-                    // request
+                    locationViewModel.proceedIntent(
+                        LocationViewModel.LocationScreenIntent.GetTheWeatherIntent,
+                        textLat,
+                        textLon
+                    )
                 },
-                modifier = Modifier.background(color = Color.White,
+                modifier = Modifier.background(
+                    color = Color.White,
                     shape = RoundedCornerShape(12.dp)
                 )
             ) {
@@ -174,6 +216,7 @@ fun PrintLatLonSection() {
         }
     }
 }
+
 
 @Composable
 fun ThirdScreenCheck(modifier: Modifier) {

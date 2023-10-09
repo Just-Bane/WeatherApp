@@ -36,13 +36,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
+import com.example.composeweatherapp.core.CITY_SCREEN
 import com.example.composeweatherapp.ui.screens.main.BoxesSection
+import com.example.composeweatherapp.ui.screens.main.EnableDialog
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
 import com.example.composeweatherapp.ui.screens.main.TemperatureSection
 import com.example.composeweatherapp.ui.screens.main.WeatherUIData
+import com.example.composeweatherapp.ui.screens.third.LocationViewModel
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.ui.theme.gradientColorList
+import kotlinx.coroutines.selects.whileSelect
 
 @Composable
 fun CityScreen(modifier: Modifier) {
@@ -62,7 +66,7 @@ fun CityScreen(modifier: Modifier) {
 
         CityViewModel.CityScreenState.WrongCityWritten -> {
             CityScreenUI(modifier = Modifier)
-            EnableDialog()
+            EnableDialog(CITY_SCREEN)
         }
 
         CityViewModel.CityScreenState.NoInternet -> {
@@ -121,47 +125,6 @@ fun CityScreenUI(
             )
             PrintCitySection()
         }
-    }
-}
-
-@Composable
-fun EnableDialog() {
-
-    val cityViewModel: CityViewModel = hiltViewModel()
-
-    val openDialog = rememberSaveable {
-        mutableStateOf(true)
-    }
-    openDialog.value = true
-    if (openDialog.value) {
-        AlertDialog(
-            onDismissRequest = {
-                openDialog.value = false
-                cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        openDialog.value = false
-                        cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
-                    }
-                ) {
-                    Text("Ok")
-                }
-            },
-            text = {
-                Row(modifier = Modifier) {
-                    Icon(
-                        imageVector = Icons.Default.Warning,
-                        contentDescription = null
-                    )
-                    Text(
-                        modifier = Modifier.padding(start = 8.dp),
-                        text = "This city does not exist"
-                    )
-                }
-            }
-        )
     }
 }
 

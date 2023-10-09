@@ -19,12 +19,12 @@ fun BottomNavGraph(navController: NavHostController) {
             CityScreen(modifier = Modifier)
         }
         composable(route = BottomBarScreen.Home.route) {
-            HomeScreen(modifier = Modifier)
+            HomeScreen(modifier = Modifier, navController = navController)
         }
         composable(route = BottomBarScreen.Location.route) {
             LocationScreen(modifier = Modifier)
         }
-        composable("internet") {
+        composable(route = "internet") {
             InternetScreen(modifier = Modifier)
         }
     }
