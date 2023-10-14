@@ -3,6 +3,7 @@ package com.example.composeweatherapp.ui.screens.first
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.composeweatherapp.core.no_data
 import com.example.composeweatherapp.repository.WeatherRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.ui.screens.second.HomeViewModel
@@ -22,7 +23,7 @@ class CityViewModel @Inject constructor(
 ) : ViewModel() {
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate().format(Date())
-
+    val isOnline = mutableStateOf(weatherRepo.isOnline())
     var _city: String? = null
     init {
         viewModelScope.launch {
@@ -65,9 +66,9 @@ class CityViewModel @Inject constructor(
             is CityScreenIntent.GetWeatherIntent -> {
                 viewModelScope.launch {
                     val weatherData = weatherRepo.getCurrentWeatherCity(city)
-                    if (weatherData.name == "NO_DATA") {
+                    if (weatherData.name == no_data) {
                         screenState.value = CityScreenState.WrongCityWritten
-                    } else if (weatherData.name == "Moscow "+weatherRepo.updateStep) {
+                    } else if (weatherData.name == "Moscow " + weatherRepo.updateStep) {
                         screenState.value = CityScreenState.WrongCityWritten
                     } else {
                         weather.value = weatherData

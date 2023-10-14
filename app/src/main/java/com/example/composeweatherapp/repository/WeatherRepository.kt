@@ -158,4 +158,8 @@ class WeatherRepository @Inject constructor(
             )
         }
     }
+
+    fun isOnline(): Boolean {
+        return internetUC.isOnline()
+    }
 }

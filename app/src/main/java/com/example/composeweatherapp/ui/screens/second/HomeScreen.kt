@@ -30,11 +30,7 @@ fun HomeScreen(
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
 
-    val internetIsAvailable = rememberSaveable {
-        mutableStateOf(homeViewModel.isOnline())
-    }
-
-    if (internetIsAvailable.value) {
+    if (homeViewModel.isOnline.value) {
        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.Default
     } else {
         homeViewModel.screenState.value = HomeViewModel.HomeScreenState.NoInternet

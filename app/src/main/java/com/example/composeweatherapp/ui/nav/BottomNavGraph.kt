@@ -16,7 +16,7 @@ import com.example.composeweatherapp.ui.screens.third.LocationScreen
 fun BottomNavGraph(navController: NavHostController) {
     NavHost(navController = navController, startDestination = BottomBarScreen.Home.route) {
         composable(route = BottomBarScreen.City.route) {
-            CityScreen(modifier = Modifier)
+            CityScreen(modifier = Modifier, navController = navController)
         }
         composable(route = BottomBarScreen.Home.route) {
             HomeScreen(modifier = Modifier, navController = navController)

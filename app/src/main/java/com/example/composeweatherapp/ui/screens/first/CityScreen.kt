@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
 import com.example.composeweatherapp.core.CITY_SCREEN
@@ -49,10 +50,14 @@ import com.example.composeweatherapp.ui.theme.gradientColorList
 import kotlinx.coroutines.selects.whileSelect
 
 @Composable
-fun CityScreen(modifier: Modifier) {
+fun CityScreen(modifier: Modifier, navController: NavController) {
     val cityViewModel: CityViewModel = hiltViewModel()
 
-    val navController = rememberNavController()
+    if (cityViewModel.isOnline.value) {
+        cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
+    } else {
+        cityViewModel.screenState.value = CityViewModel.CityScreenState.NoInternet
+    }
 
     when (cityViewModel.screenState.value) {
         is CityViewModel.CityScreenState.WriteTheCity -> {

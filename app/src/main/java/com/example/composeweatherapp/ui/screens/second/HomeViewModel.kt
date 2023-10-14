@@ -1,6 +1,7 @@
 package com.example.composeweatherapp.ui.screens.second
 
 import android.content.Context
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -18,13 +19,13 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val date: DateUseCase,
-    private val internet: InternetUseCase,
     private val weatherRepo: WeatherRepository
 ): ViewModel() {
 
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate()
     val screenState = mutableStateOf<HomeScreenState>(HomeScreenState.Default)
+    val isOnline = mutableStateOf(weatherRepo.isOnline())
 
     init {
         viewModelScope.launch {
@@ -36,10 +37,6 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
-    }
-
-    fun isOnline(): Boolean {
-        return internet.isOnline()
     }
 
     sealed class HomeScreenState {
