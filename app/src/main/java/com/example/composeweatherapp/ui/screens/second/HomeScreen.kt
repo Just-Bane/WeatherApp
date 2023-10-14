@@ -30,23 +30,25 @@ fun HomeScreen(
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
 
-    val locationWeather = homeViewModel.weather
-
-    val context = LocalContext.current
-
     val internetIsAvailable = rememberSaveable {
         mutableStateOf(homeViewModel.isOnline())
     }
 
     if (internetIsAvailable.value) {
-        HomeScreenUI(modifier = modifier)
+       homeViewModel.screenState.value = HomeViewModel.HomeScreenState.Default
     } else {
-        HomeScreenUI(modifier = modifier)
-        navController.navigate("internet")
+        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.NoInternet
+    }
+
+    when(homeViewModel.screenState.value) {
+        HomeViewModel.HomeScreenState.Default -> {
+            HomeScreenUI(modifier = modifier)
+        }
+        HomeViewModel.HomeScreenState.NoInternet -> {
+            navController.navigate("internet")
+        }
     }
 }
-
-
 
 
 @Composable
@@ -170,31 +172,31 @@ fun HomeScreenUI(modifier: Modifier) {
 //        }
 //    }
 //}
-
-@Composable
-fun ButtonAndText(text: String, button: String, onClickEvent: () -> Unit) {
-    Text(text)
-    Button(onClick = {
-        onClickEvent()
-    }) {
-        Text(button)
-    }
-}
-
-@Composable
-fun SimpleText(text: String) {
-    Text(text)
-}
-
-@Composable
-fun ErrorMessage(text: Exception, button: String, onClickEvent: () -> Unit) {
-    Text(
-        modifier = Modifier.background(Color.Red),
-        text = text.message!!
-    )
-    Button(onClick = {
-        onClickEvent()
-    }) {
-        Text(button)
-    }
-}
+//
+//@Composable
+//fun ButtonAndText(text: String, button: String, onClickEvent: () -> Unit) {
+//    Text(text)
+//    Button(onClick = {
+//        onClickEvent()
+//    }) {
+//        Text(button)
+//    }
+//}
+//
+//@Composable
+//fun SimpleText(text: String) {
+//    Text(text)
+//}
+//
+//@Composable
+//fun ErrorMessage(text: Exception, button: String, onClickEvent: () -> Unit) {
+//    Text(
+//        modifier = Modifier.background(Color.Red),
+//        text = text.message!!
+//    )
+//    Button(onClick = {
+//        onClickEvent()
+//    }) {
+//        Text(button)
+//    }
+//}

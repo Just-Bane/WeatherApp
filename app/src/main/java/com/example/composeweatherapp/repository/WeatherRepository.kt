@@ -1,8 +1,11 @@
 package com.example.composeweatherapp.repository
 
 import android.util.Log
+import com.example.composeweatherapp.core.no_data
+import com.example.composeweatherapp.core.no_internet
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.retrofit.RetrofitInit
+import com.example.composeweatherapp.usecase.InternetUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -18,7 +21,8 @@ import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
 class WeatherRepository @Inject constructor(
-    private val retrofit: RetrofitInit
+    private val retrofit: RetrofitInit,
+    private val internetUC: InternetUseCase
 ) : CoroutineScope {
 
     override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.IO
@@ -41,7 +45,7 @@ class WeatherRepository @Inject constructor(
 
     var updateStep = 0
 
-    var locationTimeout: Int = 0
+    private var locationTimeout: Int = 0
 
     private var firstDownload: Boolean = true
 
@@ -87,51 +91,71 @@ class WeatherRepository @Inject constructor(
         lat: String,
         lon: String
     ): CurrentWeatherData = withContext(Dispatchers.IO) {
-        val response = retrofit.api.getCurrentWeather(
-            lat = lat,
-            lon = lon,
-            appid = apiKey
-        )
-        return@withContext response.body()?.let { data ->
-            CurrentWeatherData(
-                temp = Math.round((data.main.temp).toDouble()).toString(),
-                name = data.name + " " + updateStep,
-                humidity = data.main.humidity,
-                description = data.weather[0].description,
-                speed = data.wind.speed,
+        if (!internetUC.isOnline()) {
+            return@withContext CurrentWeatherData(
+                name = no_internet,
+                temp = no_internet,
+                humidity = no_internet,
+                description = no_internet,
+                speed = no_internet
+            )
+        } else {
+            val response = retrofit.api.getCurrentWeather(
+                lat = lat,
+                lon = lon,
+                appid = apiKey
+            )
+            return@withContext response.body()?.let { data ->
+                CurrentWeatherData(
+                    temp = Math.round((data.main.temp).toDouble()).toString(),
+                    name = data.name + " " + updateStep,
+                    humidity = data.main.humidity,
+                    description = data.weather[0].description,
+                    speed = data.wind.speed,
 
-                )
-        } ?: CurrentWeatherData(
-            name = "NO_DATA",
-            temp = "NO_DATA",
-            humidity = "NO_DATA",
-            description = "NO_DATA",
-            speed = "NO_DATA"
-        )
+                    )
+            } ?: CurrentWeatherData(
+                name = no_data,
+                temp = no_data,
+                humidity = no_data,
+                description = no_data,
+                speed = no_data
+            )
+        }
     }
 
     suspend fun getCurrentWeatherCity(
         city: String
     ): CurrentWeatherData = withContext(Dispatchers.IO) {
-        val response = retrofit.api.getCurrentWeatherCity(
-            city = city,
-            appid = apiKey
-        )
-        return@withContext response.body()?.let { data ->
-            CurrentWeatherData(
-                temp = Math.round((data.main.temp).toDouble()).toString(),
-                name = data.name + " " + updateStep,
-                humidity = data.main.humidity,
-                description = data.weather[0].description,
-                speed = data.wind.speed,
+        if (!internetUC.isOnline()) {
+            return@withContext CurrentWeatherData(
+                name = no_internet,
+                temp = no_internet,
+                humidity = no_internet,
+                description = no_internet,
+                speed = no_internet
+            )
+        } else {
+            val response = retrofit.api.getCurrentWeatherCity(
+                city = city,
+                appid = apiKey
+            )
+            return@withContext response.body()?.let { data ->
+                CurrentWeatherData(
+                    temp = Math.round((data.main.temp).toDouble()).toString(),
+                    name = data.name + " " + updateStep,
+                    humidity = data.main.humidity,
+                    description = data.weather[0].description,
+                    speed = data.wind.speed,
 
-                )
-        } ?: CurrentWeatherData(
-            name = "NO_DATA",
-            temp = "NO_DATA",
-            humidity = "NO_DATA",
-            description = "NO_DATA",
-            speed = "NO_DATA"
-        )
+                    )
+            } ?: CurrentWeatherData(
+                name = no_data,
+                temp = no_data,
+                humidity = no_data,
+                description = no_data,
+                speed = no_data
+            )
+        }
     }
 }

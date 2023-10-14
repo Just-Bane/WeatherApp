@@ -23,7 +23,8 @@ class HomeViewModel @Inject constructor(
 ): ViewModel() {
 
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
-    val currentDate: String = date.getDate().format(Date())
+    val currentDate: String = date.getDate()
+    val screenState = mutableStateOf<HomeScreenState>(HomeScreenState.Default)
 
     init {
         viewModelScope.launch {
@@ -39,6 +40,11 @@ class HomeViewModel @Inject constructor(
 
     fun isOnline(): Boolean {
         return internet.isOnline()
+    }
+
+    sealed class HomeScreenState {
+        object Default: HomeScreenState()
+        object NoInternet: HomeScreenState()
     }
 
 

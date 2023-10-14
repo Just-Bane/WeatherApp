@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.composeweatherapp.repository.DBRepo
 import com.example.composeweatherapp.repository.WeatherRepository
 import com.example.composeweatherapp.retrofit.RetrofitInit
+import com.example.composeweatherapp.usecase.InternetUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -29,7 +30,7 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideWeatherRepo(retrofit: RetrofitInit): WeatherRepository {
-        return WeatherRepository(retrofit)
+    fun provideWeatherRepo(retrofit: RetrofitInit, internet: InternetUseCase): WeatherRepository {
+        return WeatherRepository(retrofit, internet)
     }
 }
