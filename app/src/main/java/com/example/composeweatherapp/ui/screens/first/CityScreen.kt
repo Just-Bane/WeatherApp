@@ -44,6 +44,7 @@ import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
 import com.example.composeweatherapp.ui.screens.main.TemperatureSection
 import com.example.composeweatherapp.ui.screens.main.WeatherUIData
+import com.example.composeweatherapp.ui.screens.second.HomeViewModel
 import com.example.composeweatherapp.ui.screens.third.LocationViewModel
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.ui.theme.gradientColorList
@@ -53,9 +54,15 @@ import kotlinx.coroutines.selects.whileSelect
 fun CityScreen(modifier: Modifier, navController: NavController) {
     val cityViewModel: CityViewModel = hiltViewModel()
 
-    if (cityViewModel.isOnline.value) {
+    if (cityViewModel.isOnline()) {
         cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
     } else {
+        cityViewModel.screenState.value = CityViewModel.CityScreenState.NoInternet
+    }
+
+    if (cityViewModel.networkStatus.value == "Available") {
+        cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
+    } else if (cityViewModel.networkStatus.value == "Lost") {
         cityViewModel.screenState.value = CityViewModel.CityScreenState.NoInternet
     }
 

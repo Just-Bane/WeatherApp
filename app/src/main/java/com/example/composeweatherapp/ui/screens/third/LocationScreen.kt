@@ -34,6 +34,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
 import com.example.composeweatherapp.core.LOCATION_SCREEN
@@ -43,14 +44,27 @@ import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
 import com.example.composeweatherapp.ui.screens.main.TemperatureSection
 import com.example.composeweatherapp.ui.screens.main.WeatherUIData
+import com.example.composeweatherapp.ui.screens.second.HomeViewModel
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.ui.theme.gradientColorList
 
 @Composable
-fun LocationScreen(modifier: Modifier) {
+fun LocationScreen(modifier: Modifier, navController: NavController) {
     val locationViewModel: LocationViewModel = hiltViewModel()
 
-    val navController = rememberNavController()
+    if (locationViewModel.isOnline()) {
+        locationViewModel.screenState.value = LocationViewModel.LocationScreenState.WriteTheLocation
+    } else {
+        locationViewModel.screenState.value = LocationViewModel.LocationScreenState.NoInternet
+    }
+
+    if (locationViewModel.networkStatus.value == "Available") {
+        locationViewModel.screenState.value = LocationViewModel.LocationScreenState.WriteTheLocation
+    } else if (locationViewModel.networkStatus.value == "Lost") {
+        locationViewModel.screenState.value = LocationViewModel.LocationScreenState.NoInternet
+    }
+
+
 
     when (locationViewModel.screenState.value) {
         LocationViewModel.LocationScreenState.WriteTheLocation -> {

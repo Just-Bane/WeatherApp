@@ -1,5 +1,6 @@
 package com.example.composeweatherapp.ui.screens.first
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,6 +9,7 @@ import com.example.composeweatherapp.repository.WeatherRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.ui.screens.second.HomeViewModel
 import com.example.composeweatherapp.usecase.DateUseCase
+import com.example.composeweatherapp.usecase.InternetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,14 +21,23 @@ import javax.inject.Inject
 @HiltViewModel
 class CityViewModel @Inject constructor(
     private val date: DateUseCase,
-    private val weatherRepo: WeatherRepository
+    private val weatherRepo: WeatherRepository,
+    private val internetUC: InternetUseCase
 ) : ViewModel() {
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate().format(Date())
-    val isOnline = mutableStateOf(weatherRepo.isOnline())
+    var networkStatus = mutableStateOf("")
     var _city: String? = null
     init {
         viewModelScope.launch {
+            viewModelScope.launch {
+                internetUC.observe().collect {
+                    withContext(Dispatchers.Main) {
+                        networkStatus.value = it.name
+                        Log.e("internet", "$it in the homeViewModel")
+                    }
+                }
+            }
             weatherRepo.weatherUIFlow.collect {
                 withContext(Dispatchers.Main) {
                     if (it != null) {
@@ -36,6 +47,8 @@ class CityViewModel @Inject constructor(
             }
         }
     }
+
+    fun isOnline(): Boolean { return internetUC.isOnline() }
 
     private fun updatePrefInfo(city: String) {
         _city = city

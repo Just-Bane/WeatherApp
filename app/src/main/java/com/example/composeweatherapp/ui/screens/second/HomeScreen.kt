@@ -1,5 +1,6 @@
 package com.example.composeweatherapp.ui.screens.second
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,9 +31,15 @@ fun HomeScreen(
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
 
-    if (homeViewModel.isOnline.value) {
-       homeViewModel.screenState.value = HomeViewModel.HomeScreenState.Default
+    if (homeViewModel.isOnline()) {
+        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.Default
     } else {
+        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.NoInternet
+    }
+
+    if (homeViewModel.networkStatus.value == "Available") {
+        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.Default
+    } else if (homeViewModel.networkStatus.value == "Lost") {
         homeViewModel.screenState.value = HomeViewModel.HomeScreenState.NoInternet
     }
 

@@ -1,10 +1,12 @@
 package com.example.composeweatherapp.repository
 
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import com.example.composeweatherapp.core.no_data
 import com.example.composeweatherapp.core.no_internet
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.retrofit.RetrofitInit
+import com.example.composeweatherapp.usecase.ConnectivityObserver
 import com.example.composeweatherapp.usecase.InternetUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -12,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -49,7 +52,6 @@ class WeatherRepository @Inject constructor(
 
     private var firstDownload: Boolean = true
 
-
     init {
         launch {
             while (true) {
@@ -86,6 +88,27 @@ class WeatherRepository @Inject constructor(
         }
     }
 
+    fun onWeatherRefresh() {
+        launch {
+            if (locationLat == "no_location") {
+                data = CurrentWeatherData(
+                    name = "No_location",
+                    temp = "-",
+                    speed = "-",
+                    humidity = "-",
+                    description = "no_loc"
+                )
+            } else if (city != null && cityUpdate) {
+                data = getCurrentWeatherCity(city!!)
+            } else if (lat != null && lon != null && locUpdate) {
+                data = getCurrentWeather(lat!!, lon!!)
+            } else {
+                data = getCurrentWeather(locationLat!!, locationLon!!)
+            }
+            weatherUIFlow.emit(data)
+            Log.e("flow", "emited data $data")
+        }
+    }
 
     suspend fun getCurrentWeather(
         lat: String,
@@ -157,9 +180,5 @@ class WeatherRepository @Inject constructor(
                 speed = no_data
             )
         }
-    }
-
-    fun isOnline(): Boolean {
-        return internetUC.isOnline()
     }
 }

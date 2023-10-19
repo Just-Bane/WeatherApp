@@ -26,13 +26,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.composeweatherapp.R
+import com.example.composeweatherapp.ui.nav.BottomBarScreen
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.theme.boxesColor
 import com.example.composeweatherapp.ui.theme.gradientColorList
 
 @Composable
-fun InternetScreen(modifier: Modifier) {
+fun InternetScreen(modifier: Modifier, navController: NavController) {
+
+    val internetViewModel: InternetViewModel = hiltViewModel()
     val context = LocalContext.current
 
     val fontFamily = FontFamily(
@@ -71,7 +76,15 @@ fun InternetScreen(modifier: Modifier) {
             )
             Spacer(modifier = Modifier.height(16.dp))
             Button(
-                onClick = { /*TODO*/ },
+                onClick = {
+                          if (internetViewModel.isOnline()) {
+                              internetViewModel.onButtonRetryClicked()
+                              internetViewModel.onWeatherRefresh()
+                              if (internetViewModel.weatherRefreshed.value) {
+                                  navController.navigate(BottomBarScreen.Home.route)
+                              }
+                          }
+                },
                 colors = ButtonDefaults.buttonColors(boxesColor),
                 shape = RoundedCornerShape(20.dp),
             ) {
@@ -85,10 +98,4 @@ fun InternetScreen(modifier: Modifier) {
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun InternetScreenCheck() {
-    InternetScreen(modifier = Modifier)
 }

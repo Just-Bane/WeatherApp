@@ -6,6 +6,7 @@
 package com.example.composeweatherapp.ui.screens.main
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -71,13 +72,38 @@ fun MainScreen(
     modifier: Modifier
 ) {
 
+    val mainViewModel: MainViewModel = hiltViewModel()
     val navController = rememberNavController()
 
-    Scaffold(
-        bottomBar = { BottomNavSection(navController = navController) }
-    ) {
-        BottomNavGraph(navController = navController)
+    if (mainViewModel.isOnline()) {
+        Log.i("inter", "available by state(available)")
+        Scaffold(
+            bottomBar = { BottomNavSection(navController = navController) }
+        ) {
+            BottomNavGraph(navController = navController)
+        }
+    } else {
+        Log.i("inter", "available by state(lost)")
+        Scaffold {
+            BottomNavGraph(navController = navController)
+        }
     }
+
+//    if (mainViewModel.networkStatus.value == "Available" && mainViewModel.buttonRetryClicked.value) {
+//        Log.i("inter", "available by flow(available)")
+//        Scaffold(
+//            bottomBar = { BottomNavSection(navController = navController) }
+//        ) {
+//            BottomNavGraph(navController = navController)
+//        }
+//    } else
+        if (mainViewModel.networkStatus.value == "Lost") {
+        Log.i("inter", "available by flow(lost)")
+        Scaffold {
+            BottomNavGraph(navController = navController)
+        }
+    }
+
 }
 
 

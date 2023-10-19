@@ -22,10 +22,10 @@ fun BottomNavGraph(navController: NavHostController) {
             HomeScreen(modifier = Modifier, navController = navController)
         }
         composable(route = BottomBarScreen.Location.route) {
-            LocationScreen(modifier = Modifier)
+            LocationScreen(modifier = Modifier, navController = navController)
         }
         composable(route = "internet") {
-            InternetScreen(modifier = Modifier)
+            InternetScreen(modifier = Modifier, navController = navController)
         }
     }
 }

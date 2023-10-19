@@ -1,11 +1,13 @@
 package com.example.composeweatherapp.ui.screens.third
 
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.composeweatherapp.repository.WeatherRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.usecase.DateUseCase
+import com.example.composeweatherapp.usecase.InternetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,15 +18,25 @@ import javax.inject.Inject
 @HiltViewModel
 class LocationViewModel @Inject constructor(
     private val date: DateUseCase,
-    private val weatherRepo: WeatherRepository
+    private val weatherRepo: WeatherRepository,
+    private val internetUC: InternetUseCase
 ) : ViewModel() {
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate().format(Date())
+    var networkStatus = mutableStateOf("")
 
     var _lat: String? = null
     var _lon: String? = null
 
     init {
+        viewModelScope.launch {
+            internetUC.observe().collect {
+                withContext(Dispatchers.Main) {
+                    networkStatus.value = it.name
+                    Log.e("internet", "$it in the homeViewModel")
+                }
+            }
+        }
         viewModelScope.launch {
             weatherRepo.weatherUIFlow.collect {
                 withContext(Dispatchers.Main) {
@@ -35,6 +47,8 @@ class LocationViewModel @Inject constructor(
             }
         }
     }
+
+    fun isOnline(): Boolean { return internetUC.isOnline() }
 
     sealed class LocationScreenState {
         object WriteTheLocation : LocationScreenState()
