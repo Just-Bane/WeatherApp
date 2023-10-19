@@ -17,6 +17,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
+import com.example.composeweatherapp.core.internet_available
+import com.example.composeweatherapp.core.internet_lost
 import com.example.composeweatherapp.ui.screens.main.BoxesSection
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
@@ -37,9 +39,9 @@ fun HomeScreen(
         homeViewModel.screenState.value = HomeViewModel.HomeScreenState.NoInternet
     }
 
-    if (homeViewModel.networkStatus.value == "Available") {
+    if (homeViewModel.networkStatus.value == internet_available) {
         homeViewModel.screenState.value = HomeViewModel.HomeScreenState.Default
-    } else if (homeViewModel.networkStatus.value == "Lost") {
+    } else if (homeViewModel.networkStatus.value == internet_lost) {
         homeViewModel.screenState.value = HomeViewModel.HomeScreenState.NoInternet
     }
 

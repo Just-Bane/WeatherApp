@@ -15,9 +15,6 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val internetUC: InternetUseCase
 ): ViewModel() {
-    var firstInit = mutableStateOf(true)
-
-    var buttonRetryClicked = mutableStateOf(internetUC.buttonRetryClicked)
 
     var networkStatus = mutableStateOf("")
 

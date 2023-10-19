@@ -38,6 +38,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
 import com.example.composeweatherapp.core.CITY_SCREEN
+import com.example.composeweatherapp.core.internet_available
+import com.example.composeweatherapp.core.internet_lost
 import com.example.composeweatherapp.ui.screens.main.BoxesSection
 import com.example.composeweatherapp.ui.screens.main.EnableDialog
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
@@ -60,9 +62,9 @@ fun CityScreen(modifier: Modifier, navController: NavController) {
         cityViewModel.screenState.value = CityViewModel.CityScreenState.NoInternet
     }
 
-    if (cityViewModel.networkStatus.value == "Available") {
+    if (cityViewModel.networkStatus.value == internet_available) {
         cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
-    } else if (cityViewModel.networkStatus.value == "Lost") {
+    } else if (cityViewModel.networkStatus.value == internet_lost) {
         cityViewModel.screenState.value = CityViewModel.CityScreenState.NoInternet
     }
 

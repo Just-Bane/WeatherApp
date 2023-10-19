@@ -29,26 +29,22 @@ class InternetUseCase @Inject constructor(
                 override fun onAvailable(network: Network) {
                     super.onAvailable(network)
                     launch { send(ConnectivityObserver.Status.Available)
-                        Log.e("internet", "Available in usecase")
                     }
                 }
 
                 override fun onLosing(network: Network, maxMsToLive: Int) {
                     super.onLosing(network, maxMsToLive)
-                    launch { send(ConnectivityObserver.Status.Losing)
-                        Log.e("internet", "Losing")}
+                    launch { send(ConnectivityObserver.Status.Losing) }
                 }
 
                 override fun onLost(network: Network) {
                     super.onLost(network)
-                    launch { send(ConnectivityObserver.Status.Lost)
-                        Log.e("internet", "Lost")}
+                    launch { send(ConnectivityObserver.Status.Lost) }
                 }
 
                 override fun onUnavailable() {
                     super.onUnavailable()
-                    launch { send(ConnectivityObserver.Status.Unavailable)
-                        Log.e("internet", "UnAvailable")}
+                    launch { send(ConnectivityObserver.Status.Unavailable) }
                 }
             }
             connectivityManager.registerDefaultNetworkCallback(callback)
@@ -66,13 +62,10 @@ class InternetUseCase @Inject constructor(
                 connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork)
             if (capabilities != null) {
                 if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_CELLULAR")
                     return true
                 } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_WIFI")
                     return true
                 } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) {
-                    Log.i("Internet", "NetworkCapabilities.TRANSPORT_ETHERNET")
                     return true
                 }
             }

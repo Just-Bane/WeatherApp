@@ -59,6 +59,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
 import com.example.composeweatherapp.core.CITY_SCREEN
 import com.example.composeweatherapp.core.LOCATION_SCREEN
+import com.example.composeweatherapp.core.internet_lost
 import com.example.composeweatherapp.ui.nav.BottomBarScreen
 import com.example.composeweatherapp.ui.nav.BottomNavGraph
 import com.example.composeweatherapp.ui.screens.first.CityViewModel
@@ -88,16 +89,7 @@ fun MainScreen(
             BottomNavGraph(navController = navController)
         }
     }
-
-//    if (mainViewModel.networkStatus.value == "Available" && mainViewModel.buttonRetryClicked.value) {
-//        Log.i("inter", "available by flow(available)")
-//        Scaffold(
-//            bottomBar = { BottomNavSection(navController = navController) }
-//        ) {
-//            BottomNavGraph(navController = navController)
-//        }
-//    } else
-        if (mainViewModel.networkStatus.value == "Lost") {
+    if (mainViewModel.networkStatus.value == internet_lost) {
         Log.i("inter", "available by flow(lost)")
         Scaffold {
             BottomNavGraph(navController = navController)

@@ -33,7 +33,6 @@ class LocationViewModel @Inject constructor(
             internetUC.observe().collect {
                 withContext(Dispatchers.Main) {
                     networkStatus.value = it.name
-                    Log.e("internet", "$it in the homeViewModel")
                 }
             }
         }

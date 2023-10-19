@@ -6,3 +6,6 @@ const val LOCATION_SCREEN = "location_screen"
 const val no_internet = "NO_INTERNET"
 const val no_location = "NO_LOCATION"
 const val no_data = "NO_DATA"
+
+const val internet_lost = "Lost"
+const val internet_available = "Available"
