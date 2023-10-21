@@ -4,10 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import com.example.composeweatherapp.ui.screens.main.MainScreen
+import com.example.composeweatherapp.ui.screens.main.AppNavigator
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
-import com.example.composeweatherapp.usecase.InternetUseCase
 import com.example.composeweatherapp.usecase.RequestUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -25,9 +23,7 @@ class MainActivity : ComponentActivity() {
         requestUC.getLocation()
         setContent {
             ComposeWeatherAppTheme {
-//                ThirdScreen(modifier = Modifier)
-//                FirstScreenCheck(modifier = Modifier)
-                MainScreen(modifier = Modifier)
+                AppNavigator(modifier = Modifier)
             }
         }
     }

@@ -1,23 +1,16 @@
-package com.example.composeweatherapp.repository
+package com.example.composeweatherapp.repository.weather
 
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
 import com.example.composeweatherapp.core.no_data
 import com.example.composeweatherapp.core.no_internet
+import com.example.composeweatherapp.repository.internet.InternetRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.retrofit.RetrofitInit
-import com.example.composeweatherapp.usecase.ConnectivityObserver
-import com.example.composeweatherapp.usecase.InternetUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -25,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
 
 class WeatherRepository @Inject constructor(
     private val retrofit: RetrofitInit,
-    private val internetUC: InternetUseCase
+    private val internetRepo: InternetRepository
 ) : CoroutineScope {
 
     override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.IO
@@ -114,7 +107,7 @@ class WeatherRepository @Inject constructor(
         lat: String,
         lon: String
     ): CurrentWeatherData = withContext(Dispatchers.IO) {
-        if (!internetUC.isOnline()) {
+        if (!internetRepo.isOnline()) {
             return@withContext CurrentWeatherData(
                 name = no_internet,
                 temp = no_internet,
@@ -150,7 +143,7 @@ class WeatherRepository @Inject constructor(
     suspend fun getCurrentWeatherCity(
         city: String
     ): CurrentWeatherData = withContext(Dispatchers.IO) {
-        if (!internetUC.isOnline()) {
+        if (!internetRepo.isOnline()) {
             return@withContext CurrentWeatherData(
                 name = no_internet,
                 temp = no_internet,

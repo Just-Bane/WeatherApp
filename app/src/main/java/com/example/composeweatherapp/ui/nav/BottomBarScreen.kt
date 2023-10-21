@@ -27,3 +27,12 @@ sealed class BottomBarScreen(
         icon = Icons.Default.Place
     )
 }
+
+sealed class NavigationScreens(
+    val route: String,
+) {
+    object City: NavigationScreens(route = "city")
+    object Home: NavigationScreens(route = "home")
+    object Location: NavigationScreens(route = "location")
+    object Internet: NavigationScreens(route = "internet")
+}

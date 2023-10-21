@@ -1,13 +1,15 @@
 package com.example.composeweatherapp.ui.screens.third
 
-import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.composeweatherapp.repository.WeatherRepository
+import com.example.composeweatherapp.core.BaseViewModel
+import com.example.composeweatherapp.core.SomeEvent
+import com.example.composeweatherapp.core.internet_available
+import com.example.composeweatherapp.core.internet_lost
+import com.example.composeweatherapp.repository.internet.InternetRepository
+import com.example.composeweatherapp.repository.weather.WeatherRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.usecase.DateUseCase
-import com.example.composeweatherapp.usecase.InternetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -19,23 +21,18 @@ import javax.inject.Inject
 class LocationViewModel @Inject constructor(
     private val date: DateUseCase,
     private val weatherRepo: WeatherRepository,
-    private val internetUC: InternetUseCase
-) : ViewModel() {
+    private val internetRepo: InternetRepository
+) : BaseViewModel<LocationScreenState, SomeEvent<LocationScreenEvent>, LocationScreenIntent>() {
+
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate().format(Date())
-    var networkStatus = mutableStateOf("")
 
-    var _lat: String? = null
-    var _lon: String? = null
+    var latFromUI: String? = null
+    var lonFromUI: String? = null
+
+    override val defaultState: LocationScreenState = LocationScreenState.WriteTheLocation
 
     init {
-        viewModelScope.launch {
-            internetUC.observe().collect {
-                withContext(Dispatchers.Main) {
-                    networkStatus.value = it.name
-                }
-            }
-        }
         viewModelScope.launch {
             weatherRepo.weatherUIFlow.collect {
                 withContext(Dispatchers.Main) {
@@ -47,32 +44,35 @@ class LocationViewModel @Inject constructor(
         }
     }
 
-    fun isOnline(): Boolean { return internetUC.isOnline() }
+    fun isOnlineChecking() {
+        if (internetRepo.isOnline()) {
+            _viewState.value = LocationScreenState.WriteTheLocation
+        } else {
+            _viewState.value = LocationScreenState.NoInternet
+        }
 
-    sealed class LocationScreenState {
-        object WriteTheLocation : LocationScreenState()
-        object CorrectLocationWritten : LocationScreenState()
-        object WrongLocationWritten : LocationScreenState()
-        object NoInternet : LocationScreenState()
+        if (internetRepo.networkStatusObserver.value == internet_available) {
+            _viewState.value = LocationScreenState.WriteTheLocation
+        } else if (internetRepo.networkStatusObserver.value == internet_lost) {
+            _viewState.value = LocationScreenState.NoInternet
+        }
     }
 
-    sealed class LocationScreenIntent {
-        object GetTheWeatherIntent: LocationScreenIntent()
+    fun changeToDefaultState() {
+        _viewState.value = defaultState
     }
 
-    val screenState = mutableStateOf<LocationScreenState>(LocationScreenState.WriteTheLocation)
-
-    fun proceedIntent(intent: LocationScreenIntent, lat: String, lon: String) {
+    override fun proceedIntent(intent: LocationScreenIntent) {
         when (intent) {
             LocationScreenIntent.GetTheWeatherIntent -> {
                 viewModelScope.launch {
-                    val weatherData = weatherRepo.getCurrentWeather(lat, lon)
+                    val weatherData = weatherRepo.getCurrentWeather(latFromUI!!, lonFromUI!!)
                     if (weatherData.name == "NO_DATA") {
-                        screenState.value = LocationScreenState.WrongLocationWritten
+                        _viewState.value = LocationScreenState.WrongLocationWritten
                     } else {
                         weather.value = weatherData
-                        screenState.value = LocationScreenState.CorrectLocationWritten
-                        updatePrefLoc(lat, lon)
+                        _viewState.value = LocationScreenState.CorrectLocationWritten
+                        updatePrefLoc(latFromUI!!, lonFromUI!!)
                     }
                 }
             }
@@ -80,8 +80,8 @@ class LocationViewModel @Inject constructor(
     }
 
     private fun updatePrefLoc(lat: String, lon: String) {
-        _lat = lat
-        _lon = lon
+        latFromUI = lat
+        latFromUI = lon
         weatherRepo.lat = lat
         weatherRepo.lon = lon
         weatherRepo.locUpdate = true

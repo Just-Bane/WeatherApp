@@ -1,12 +1,8 @@
-@file:OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3Api::class
-)
+
 
 package com.example.composeweatherapp.ui.screens.main
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,9 +23,6 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,7 +35,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -51,48 +43,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavDestination
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
 import com.example.composeweatherapp.core.CITY_SCREEN
 import com.example.composeweatherapp.core.LOCATION_SCREEN
-import com.example.composeweatherapp.core.internet_lost
 import com.example.composeweatherapp.ui.nav.BottomBarScreen
-import com.example.composeweatherapp.ui.nav.BottomNavGraph
+import com.example.composeweatherapp.ui.nav.NavigationScreens
+import com.example.composeweatherapp.ui.screens.first.CityScreen
 import com.example.composeweatherapp.ui.screens.first.CityViewModel
+import com.example.composeweatherapp.ui.screens.internet.InternetScreen
+import com.example.composeweatherapp.ui.screens.second.HomeScreen
+import com.example.composeweatherapp.ui.screens.third.LocationScreen
 import com.example.composeweatherapp.ui.screens.third.LocationViewModel
 import com.example.composeweatherapp.ui.theme.bottomBarColor
 import com.example.composeweatherapp.ui.theme.boxesColor
 
 @SuppressLint("SimpleDateFormat", "StringFormatInvalid", "UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MainScreen(
+fun AppNavigator(
     modifier: Modifier
 ) {
-
-    val mainViewModel: MainViewModel = hiltViewModel()
     val navController = rememberNavController()
 
-    if (mainViewModel.isOnline()) {
-        Log.i("inter", "available by state(available)")
-        Scaffold(
-            bottomBar = { BottomNavSection(navController = navController) }
-        ) {
-            BottomNavGraph(navController = navController)
+    NavHost(navController = navController, startDestination = BottomBarScreen.Home.route) {
+        composable(route = NavigationScreens.City.route) {
+            CityScreen(modifier = Modifier, navController = navController)
         }
-    } else {
-        Log.i("inter", "available by state(lost)")
-        Scaffold {
-            BottomNavGraph(navController = navController)
+        composable(route = NavigationScreens.Home.route) {
+            HomeScreen(modifier = Modifier, navController = navController)
         }
-    }
-    if (mainViewModel.networkStatus.value == internet_lost) {
-        Log.i("inter", "available by flow(lost)")
-        Scaffold {
-            BottomNavGraph(navController = navController)
+        composable(route = NavigationScreens.Location.route) {
+            LocationScreen(modifier = Modifier, navController = navController)
+        }
+        composable(route = NavigationScreens.Internet.route) {
+            InternetScreen(modifier = Modifier, navController = navController)
         }
     }
 
@@ -204,11 +192,8 @@ fun EnableDialog(screen: String) {
             onDismissRequest = {
                 openDialog.value = false
                 when (screen) {
-                    CITY_SCREEN -> cityViewModel.screenState.value =
-                        CityViewModel.CityScreenState.WriteTheCity
-
-                    LOCATION_SCREEN -> locationViewModel.screenState.value =
-                        LocationViewModel.LocationScreenState.WriteTheLocation
+                    CITY_SCREEN -> cityViewModel.changeToDefaultState()
+                    LOCATION_SCREEN -> locationViewModel.changeToDefaultState()
                 }
             },
             confirmButton = {
@@ -216,11 +201,8 @@ fun EnableDialog(screen: String) {
                     onClick = {
                         openDialog.value = false
                         when (screen) {
-                            CITY_SCREEN -> cityViewModel.screenState.value =
-                                CityViewModel.CityScreenState.WriteTheCity
-
-                            LOCATION_SCREEN -> locationViewModel.screenState.value =
-                                LocationViewModel.LocationScreenState.WriteTheLocation
+                            CITY_SCREEN -> cityViewModel.changeToDefaultState()
+                            LOCATION_SCREEN -> locationViewModel.changeToDefaultState()
                         }
                     }
                 ) {

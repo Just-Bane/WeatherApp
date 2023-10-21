@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,11 +37,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.composeweatherapp.R
 import com.example.composeweatherapp.core.CITY_SCREEN
 import com.example.composeweatherapp.core.internet_available
 import com.example.composeweatherapp.core.internet_lost
+import com.example.composeweatherapp.ui.nav.NavigationScreens
+import com.example.composeweatherapp.ui.screens.main.BottomNavSection
 import com.example.composeweatherapp.ui.screens.main.BoxesSection
 import com.example.composeweatherapp.ui.screens.main.EnableDialog
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
@@ -53,38 +58,28 @@ import com.example.composeweatherapp.ui.theme.gradientColorList
 import kotlinx.coroutines.selects.whileSelect
 
 @Composable
-fun CityScreen(modifier: Modifier, navController: NavController) {
+fun CityScreen(modifier: Modifier, navController: NavHostController) {
     val cityViewModel: CityViewModel = hiltViewModel()
 
-    if (cityViewModel.isOnline()) {
-        cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
-    } else {
-        cityViewModel.screenState.value = CityViewModel.CityScreenState.NoInternet
-    }
+    var state = cityViewModel.viewState.collectAsState()
+    val event = cityViewModel.event.collectAsState()
 
-    if (cityViewModel.networkStatus.value == internet_available) {
-        cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
-    } else if (cityViewModel.networkStatus.value == internet_lost) {
-        cityViewModel.screenState.value = CityViewModel.CityScreenState.NoInternet
-    }
+    cityViewModel.isOnlineChecking()
 
-    when (cityViewModel.screenState.value) {
-        is CityViewModel.CityScreenState.WriteTheCity -> {
-            CityScreenUI(modifier = Modifier)
+    when (state.value) {
+        is  CityScreenState.WriteTheCity-> {
+            CityScreenUI(modifier = Modifier, navController = navController)
         }
-
-        CityViewModel.CityScreenState.CorrectCityWritten -> {
-            CityScreenUI(modifier = Modifier)
-            cityViewModel.screenState.value = CityViewModel.CityScreenState.WriteTheCity
+        is CityScreenState.CorrectCityWritten -> {
+            CityScreenUI(modifier = Modifier, navController = navController)
+            cityViewModel.changeToDefaultState()
         }
-
-        CityViewModel.CityScreenState.WrongCityWritten -> {
-            CityScreenUI(modifier = Modifier)
+        is CityScreenState.NoInternet -> {
+            navController.navigate(NavigationScreens.Internet.route)
+        }
+        is CityScreenState.WrongCityWritten -> {
+            CityScreenUI(modifier = Modifier, navController = navController)
             EnableDialog(CITY_SCREEN)
-        }
-
-        CityViewModel.CityScreenState.NoInternet -> {
-            navController.navigate("internet")
         }
     }
 }
@@ -92,7 +87,8 @@ fun CityScreen(modifier: Modifier, navController: NavController) {
 
 @Composable
 fun CityScreenUI(
-    modifier: Modifier
+    modifier: Modifier,
+    navController: NavHostController
 ) {
     val cityViewModel: CityViewModel = hiltViewModel()
 
@@ -138,6 +134,10 @@ fun CityScreenUI(
                 )
             )
             PrintCitySection()
+            Spacer(modifier = Modifier.weight(1f))
+            BottomNavSection(
+                navController = navController
+            )
         }
     }
 }
@@ -214,10 +214,8 @@ fun PrintCitySection() {
             },
             trailingIcon = {
                 IconButton(onClick = {
-                    cityViewModel.proceedIntent(
-                        CityViewModel.CityScreenIntent.GetWeatherIntent,
-                        text
-                    )
+                    cityViewModel.cityFromUI = text
+                    cityViewModel.proceedIntent(CityScreenIntent.GetWeatherIntent)
                 }) {
                     Icon(imageVector = Icons.Default.Search, contentDescription = null)
                 }
@@ -228,10 +226,8 @@ fun PrintCitySection() {
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    cityViewModel.proceedIntent(
-                        CityViewModel.CityScreenIntent.GetWeatherIntent,
-                        text
-                    )
+                    cityViewModel.cityFromUI = text
+                    cityViewModel.proceedIntent(CityScreenIntent.GetWeatherIntent)
                 }
             )
         )

@@ -1,42 +1,33 @@
 package com.example.composeweatherapp.ui.screens.second
 
-import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.composeweatherapp.repository.WeatherRepository
+import com.example.composeweatherapp.core.BaseViewModel
+import com.example.composeweatherapp.core.SomeEvent
+import com.example.composeweatherapp.core.internet_available
+import com.example.composeweatherapp.core.internet_lost
+import com.example.composeweatherapp.repository.internet.InternetRepository
+import com.example.composeweatherapp.repository.weather.WeatherRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.usecase.DateUseCase
-import com.example.composeweatherapp.usecase.InternetUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val date: DateUseCase,
     private val weatherRepo: WeatherRepository,
-    private val internetUC: InternetUseCase
-): ViewModel() {
+    private val internetRepo: InternetRepository
+): BaseViewModel<HomeScreenState, SomeEvent<HomeScreenEvent>, HomeScreenIntent>() {
 
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate()
-    val screenState = mutableStateOf<HomeScreenState>(HomeScreenState.Default)
-    var networkStatus = mutableStateOf("")
 
     init {
-        viewModelScope.launch {
-            internetUC.observe().collect {
-                withContext(Dispatchers.Main) {
-                    networkStatus.value = it.name
-                }
-            }
-        }
         viewModelScope.launch {
             weatherRepo.weatherUIFlow.collect {
                 withContext(Dispatchers.Main) {
@@ -48,13 +39,30 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun isOnline(): Boolean { return internetUC.isOnline() }
 
+    override val defaultState: HomeScreenState = HomeScreenState.Default
 
-    sealed class HomeScreenState {
-        object Default: HomeScreenState()
-        object NoInternet: HomeScreenState()
+    override fun proceedIntent(intent: HomeScreenIntent) {
+        when(intent) {
+            HomeScreenIntent.GetWeatherIntent -> {
+                if (internetRepo.isOnline()) {
+                    _viewState.value = HomeScreenState.Default
+                } else {
+                    Log.e("fix", "Its no internet(from isOnline)")
+                    _viewState.value = HomeScreenState.NoInternet
+                }
+                if (internetRepo.networkStatusObserver.value == internet_lost) {
+                    _viewState.value = HomeScreenState.NoInternet
+                }
+            }
+        }
     }
+
+
+
+
+
+
 
 
 

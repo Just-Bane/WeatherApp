@@ -1,25 +1,38 @@
-package com.example.composeweatherapp.usecase
+package com.example.composeweatherapp.repository.internet
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import android.net.NetworkRequest
 import android.util.Log
+import androidx.compose.runtime.mutableStateOf
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
-
-class InternetUseCase @Inject constructor(
+class InternetRepository @Inject constructor(
     private val context: Context
-): ConnectivityObserver {
+): ConnectivityObserver, CoroutineScope {
 
-    var buttonRetryClicked: Boolean = false
+    override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.IO
+
+    var networkStatusObserver = mutableStateOf("")
+
+    init {
+        launch {
+            observe().collect {
+                networkStatusObserver.value = it.name
+                Log.i("network", "getNetworkStatus " + it.name)
+            }
+        }
+    }
 
     private val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -71,14 +84,5 @@ class InternetUseCase @Inject constructor(
             }
         }
         return false
-    }
-
-}
-
-interface ConnectivityObserver {
-    fun observe(): Flow<Status>
-
-    enum class Status {
-        Available, Unavailable, Losing, Lost
     }
 }

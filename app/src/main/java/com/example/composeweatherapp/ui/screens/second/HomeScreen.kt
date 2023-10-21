@@ -1,24 +1,20 @@
 package com.example.composeweatherapp.ui.screens.second
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
 import com.example.composeweatherapp.R
-import com.example.composeweatherapp.core.internet_available
-import com.example.composeweatherapp.core.internet_lost
+import com.example.composeweatherapp.ui.nav.NavigationScreens
+import com.example.composeweatherapp.ui.screens.main.BottomNavSection
 import com.example.composeweatherapp.ui.screens.main.BoxesSection
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
@@ -29,35 +25,28 @@ import com.example.composeweatherapp.ui.theme.gradientColorList
 @Composable
 fun HomeScreen(
     modifier: Modifier,
-    navController: NavController
+    navController: NavHostController
 ) {
     val homeViewModel: HomeViewModel = hiltViewModel()
 
-    if (homeViewModel.isOnline()) {
-        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.Default
-    } else {
-        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.NoInternet
-    }
+    val state = homeViewModel.viewState.collectAsState()
 
-    if (homeViewModel.networkStatus.value == internet_available) {
-        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.Default
-    } else if (homeViewModel.networkStatus.value == internet_lost) {
-        homeViewModel.screenState.value = HomeViewModel.HomeScreenState.NoInternet
-    }
+    homeViewModel.proceedIntent(HomeScreenIntent.GetWeatherIntent)
 
-    when(homeViewModel.screenState.value) {
-        HomeViewModel.HomeScreenState.Default -> {
-            HomeScreenUI(modifier = modifier)
+    when (state.value) {
+        HomeScreenState.Default -> {
+            HomeScreenUI(modifier = modifier, navController = navController)
         }
-        HomeViewModel.HomeScreenState.NoInternet -> {
-            navController.navigate("internet")
+
+        HomeScreenState.NoInternet -> {
+            navController.navigate(NavigationScreens.Internet.route)
         }
     }
 }
 
 
 @Composable
-fun HomeScreenUI(modifier: Modifier) {
+fun HomeScreenUI(modifier: Modifier, navController: NavHostController) {
 
     val homeViewModel: HomeViewModel = hiltViewModel()
 
@@ -69,12 +58,14 @@ fun HomeScreenUI(modifier: Modifier) {
         modifier.fillMaxSize()
     ) {
         Column(
-            modifier.background(
-                GradientBackgroundBrush(
-                    isVerticalGradient = true,
-                    colors = gradientColorList
+            modifier
+                .background(
+                    GradientBackgroundBrush(
+                        isVerticalGradient = true,
+                        colors = gradientColorList
+                    )
                 )
-            )
+                .fillMaxHeight()
         ) {
             LocationSection(
                 city = locationWeather.value.name,
@@ -101,6 +92,10 @@ fun HomeScreenUI(modifier: Modifier) {
                         weatherData = locationWeather.value.description
                     )
                 )
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            BottomNavSection(
+                navController = navController
             )
         }
     }

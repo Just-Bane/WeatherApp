@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -34,58 +35,48 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavHostController
 import com.example.composeweatherapp.R
 import com.example.composeweatherapp.core.LOCATION_SCREEN
-import com.example.composeweatherapp.core.internet_available
-import com.example.composeweatherapp.core.internet_lost
+import com.example.composeweatherapp.ui.nav.NavigationScreens
+import com.example.composeweatherapp.ui.screens.main.BottomNavSection
 import com.example.composeweatherapp.ui.screens.main.BoxesSection
 import com.example.composeweatherapp.ui.screens.main.EnableDialog
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
 import com.example.composeweatherapp.ui.screens.main.TemperatureSection
 import com.example.composeweatherapp.ui.screens.main.WeatherUIData
-import com.example.composeweatherapp.ui.screens.second.HomeViewModel
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
 import com.example.composeweatherapp.ui.theme.gradientColorList
 
 @Composable
-fun LocationScreen(modifier: Modifier, navController: NavController) {
+fun LocationScreen(modifier: Modifier, navController: NavHostController) {
+
     val locationViewModel: LocationViewModel = hiltViewModel()
 
-    if (locationViewModel.isOnline()) {
-        locationViewModel.screenState.value = LocationViewModel.LocationScreenState.WriteTheLocation
-    } else {
-        locationViewModel.screenState.value = LocationViewModel.LocationScreenState.NoInternet
-    }
+    val state = locationViewModel.viewState.collectAsState()
 
-    if (locationViewModel.networkStatus.value == internet_available) {
-        locationViewModel.screenState.value = LocationViewModel.LocationScreenState.WriteTheLocation
-    } else if (locationViewModel.networkStatus.value == internet_lost) {
-        locationViewModel.screenState.value = LocationViewModel.LocationScreenState.NoInternet
-    }
+    locationViewModel.isOnlineChecking()
 
 
 
-    when (locationViewModel.screenState.value) {
-        LocationViewModel.LocationScreenState.WriteTheLocation -> {
-            LocationScreenUI(modifier = Modifier)
+    when (state.value) {
+        LocationScreenState.WriteTheLocation -> {
+            LocationScreenUI(modifier = Modifier, navController = navController)
         }
 
-        LocationViewModel.LocationScreenState.CorrectLocationWritten -> {
-            LocationScreenUI(modifier = Modifier)
-            locationViewModel.screenState.value =
-                LocationViewModel.LocationScreenState.WriteTheLocation
+        LocationScreenState.CorrectLocationWritten -> {
+            LocationScreenUI(modifier = Modifier, navController = navController)
+            locationViewModel.changeToDefaultState()
         }
 
-        LocationViewModel.LocationScreenState.WrongLocationWritten -> {
-            LocationScreenUI(modifier = Modifier)
+        LocationScreenState.WrongLocationWritten -> {
+            LocationScreenUI(modifier = Modifier, navController = navController)
             EnableDialog(LOCATION_SCREEN)
         }
 
-        LocationViewModel.LocationScreenState.NoInternet -> {
-            navController.navigate("internet")
+        LocationScreenState.NoInternet -> {
+            navController.navigate(NavigationScreens.Internet.route)
         }
     }
 }
@@ -93,7 +84,8 @@ fun LocationScreen(modifier: Modifier, navController: NavController) {
 
 @Composable
 fun LocationScreenUI(
-    modifier: Modifier
+    modifier: Modifier,
+    navController: NavHostController
 ) {
     val locationViewModel: LocationViewModel = hiltViewModel()
 
@@ -139,6 +131,10 @@ fun LocationScreenUI(
                 )
             )
             PrintLatLonSection()
+            Spacer(modifier = Modifier.weight(1f))
+            BottomNavSection(
+                navController = navController
+            )
         }
     }
 }
@@ -216,11 +212,9 @@ fun PrintLatLonSection() {
             }
             IconButton(
                 onClick = {
-                    locationViewModel.proceedIntent(
-                        LocationViewModel.LocationScreenIntent.GetTheWeatherIntent,
-                        textLat,
-                        textLon
-                    )
+                    locationViewModel.latFromUI = textLat
+                    locationViewModel.lonFromUI = textLon
+                    locationViewModel.proceedIntent(LocationScreenIntent.GetTheWeatherIntent)
                 },
                 modifier = Modifier.background(
                     color = Color.White,

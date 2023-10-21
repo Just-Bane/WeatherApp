@@ -16,6 +16,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,13 +24,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.composeweatherapp.R
 import com.example.composeweatherapp.ui.nav.BottomBarScreen
+import com.example.composeweatherapp.ui.nav.NavigationScreens
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.theme.boxesColor
 import com.example.composeweatherapp.ui.theme.gradientColorList
@@ -38,6 +39,32 @@ import com.example.composeweatherapp.ui.theme.gradientColorList
 fun InternetScreen(modifier: Modifier, navController: NavController) {
 
     val internetViewModel: InternetViewModel = hiltViewModel()
+
+    val state = internetViewModel.viewState.collectAsState()
+
+    internetViewModel.proceedIntent(InternetScreenIntent.DefaultIntent)
+
+    when (state.value) {
+        InternetScreenState.Default -> {
+            InternetScreenUI(modifier = Modifier)
+        }
+
+        InternetScreenState.TrueInternet -> {
+            navController.navigate(NavigationScreens.Home.route)
+        }
+
+        InternetScreenState.FalseInternet -> {
+            InternetScreenUI(modifier = Modifier)
+        }
+    }
+
+
+}
+
+@Composable
+fun InternetScreenUI(modifier: Modifier) {
+    val internetViewModel: InternetViewModel = hiltViewModel()
+
     val context = LocalContext.current
 
     val fontFamily = FontFamily(
@@ -45,6 +72,7 @@ fun InternetScreen(modifier: Modifier, navController: NavController) {
         Font(R.font.montserrat_medium, FontWeight.Medium),
         Font(R.font.montserrat_bold, FontWeight.Bold)
     )
+
 
     Surface(
         modifier = modifier
@@ -77,13 +105,7 @@ fun InternetScreen(modifier: Modifier, navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                          if (internetViewModel.isOnline()) {
-                              internetViewModel.onButtonRetryClicked()
-                              internetViewModel.onWeatherRefresh()
-                              if (internetViewModel.weatherRefreshed.value) {
-                                  navController.navigate(BottomBarScreen.Home.route)
-                              }
-                          }
+                    internetViewModel.proceedIntent(InternetScreenIntent.DefaultIntent)
                 },
                 colors = ButtonDefaults.buttonColors(boxesColor),
                 shape = RoundedCornerShape(20.dp),

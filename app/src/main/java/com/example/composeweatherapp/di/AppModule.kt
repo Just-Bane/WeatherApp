@@ -1,10 +1,10 @@
 package com.example.composeweatherapp.di
 
 import android.content.Context
-import com.example.composeweatherapp.repository.DBRepo
-import com.example.composeweatherapp.repository.WeatherRepository
+import com.example.composeweatherapp.repository.database.DBRepo
+import com.example.composeweatherapp.repository.internet.InternetRepository
+import com.example.composeweatherapp.repository.weather.WeatherRepository
 import com.example.composeweatherapp.retrofit.RetrofitInit
-import com.example.composeweatherapp.usecase.InternetUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,13 +24,19 @@ class AppModule {
 
     @Provides
     @Singleton
+    fun provideInternetRepo(context: Context): InternetRepository {
+        return InternetRepository(context)
+    }
+
+    @Provides
+    @Singleton
     fun provideDBRepo(context: Context): DBRepo {
         return DBRepo(context)
     }
 
     @Provides
     @Singleton
-    fun provideWeatherRepo(retrofit: RetrofitInit, internet: InternetUseCase): WeatherRepository {
-        return WeatherRepository(retrofit, internet)
+    fun provideWeatherRepo(retrofit: RetrofitInit, internetRepo: InternetRepository): WeatherRepository {
+        return WeatherRepository(retrofit, internetRepo)
     }
 }

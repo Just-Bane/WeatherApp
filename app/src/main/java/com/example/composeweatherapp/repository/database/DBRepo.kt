@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.repository
+package com.example.composeweatherapp.repository.database
 
 import android.content.Context
 import androidx.room.Room

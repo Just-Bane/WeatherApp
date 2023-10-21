@@ -1,6 +1,6 @@
 package com.example.composeweatherapp.usecase
 
-import com.example.composeweatherapp.repository.DBRepo
+import com.example.composeweatherapp.repository.database.DBRepo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
