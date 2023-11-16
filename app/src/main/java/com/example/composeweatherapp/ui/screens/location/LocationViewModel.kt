@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.ui.screens.third
+package com.example.composeweatherapp.ui.screens.location
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
@@ -6,6 +6,8 @@ import com.example.composeweatherapp.core.BaseViewModel
 import com.example.composeweatherapp.core.SomeEvent
 import com.example.composeweatherapp.core.internet_available
 import com.example.composeweatherapp.core.internet_lost
+import com.example.composeweatherapp.core.no_data
+import com.example.composeweatherapp.repository.internet.ConnectivityObserver
 import com.example.composeweatherapp.repository.internet.InternetRepository
 import com.example.composeweatherapp.repository.weather.WeatherRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
@@ -22,7 +24,8 @@ class LocationViewModel @Inject constructor(
     private val date: DateUseCase,
     private val weatherRepo: WeatherRepository,
     private val internetRepo: InternetRepository
-) : BaseViewModel<LocationScreenState, SomeEvent<LocationScreenEvent>, LocationScreenIntent>() {
+) : BaseViewModel<LocationScreenState, LocationScreenEvents, LocationScreenIntent>(),
+    InternetRepository.ISubscription {
 
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate().format(Date())
@@ -33,6 +36,9 @@ class LocationViewModel @Inject constructor(
     override val defaultState: LocationScreenState = LocationScreenState.WriteTheLocation
 
     init {
+        _viewState.value = defaultState
+
+        internetRepo.subscribeOnInetState(this)
         viewModelScope.launch {
             weatherRepo.weatherUIFlow.collect {
                 withContext(Dispatchers.Main) {
@@ -44,17 +50,16 @@ class LocationViewModel @Inject constructor(
         }
     }
 
-    fun isOnlineChecking() {
-        if (internetRepo.isOnline()) {
-            _viewState.value = LocationScreenState.WriteTheLocation
-        } else {
-            _viewState.value = LocationScreenState.NoInternet
-        }
-
-        if (internetRepo.networkStatusObserver.value == internet_available) {
-            _viewState.value = LocationScreenState.WriteTheLocation
-        } else if (internetRepo.networkStatusObserver.value == internet_lost) {
-            _viewState.value = LocationScreenState.NoInternet
+    override fun onStatusChanged(status: ConnectivityObserver.Status) {
+        when (status) {
+            ConnectivityObserver.Status.Available -> {}
+            ConnectivityObserver.Status.Unavailable -> {
+                proceedIntent(LocationScreenIntent.LostInternetIntent)
+            }
+            ConnectivityObserver.Status.Losing -> {}
+            ConnectivityObserver.Status.Lost -> {
+                proceedIntent(LocationScreenIntent.LostInternetIntent)
+            }
         }
     }
 
@@ -64,10 +69,10 @@ class LocationViewModel @Inject constructor(
 
     override fun proceedIntent(intent: LocationScreenIntent) {
         when (intent) {
-            LocationScreenIntent.GetTheWeatherIntent -> {
+            LocationScreenIntent.GetWeatherIntent -> {
                 viewModelScope.launch {
                     val weatherData = weatherRepo.getCurrentWeather(latFromUI!!, lonFromUI!!)
-                    if (weatherData.name == "NO_DATA") {
+                    if (weatherData.name == no_data) {
                         _viewState.value = LocationScreenState.WrongLocationWritten
                     } else {
                         weather.value = weatherData
@@ -75,6 +80,11 @@ class LocationViewModel @Inject constructor(
                         updatePrefLoc(latFromUI!!, lonFromUI!!)
                     }
                 }
+            }
+
+            LocationScreenIntent.LostInternetIntent -> {
+                _viewState.value = LocationScreenState.NoInternet
+                _event.value = LocationScreenEvents.NavigateToInternetScreen
             }
         }
     }
@@ -86,5 +96,10 @@ class LocationViewModel @Inject constructor(
         weatherRepo.lon = lon
         weatherRepo.locUpdate = true
         weatherRepo.cityUpdate = false
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        internetRepo.unsubscribeInetState(this)
     }
 }

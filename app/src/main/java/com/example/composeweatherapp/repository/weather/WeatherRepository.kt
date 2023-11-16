@@ -3,6 +3,7 @@ package com.example.composeweatherapp.repository.weather
 import android.util.Log
 import com.example.composeweatherapp.core.no_data
 import com.example.composeweatherapp.core.no_internet
+import com.example.composeweatherapp.repository.internet.ConnectivityObserver
 import com.example.composeweatherapp.repository.internet.InternetRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
 import com.example.composeweatherapp.retrofit.RetrofitInit
@@ -19,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
 class WeatherRepository @Inject constructor(
     private val retrofit: RetrofitInit,
     private val internetRepo: InternetRepository
-) : CoroutineScope {
+) : CoroutineScope, InternetRepository.ISubscription {
 
     override val coroutineContext: CoroutineContext = SupervisorJob() + Dispatchers.IO
 
@@ -28,6 +29,7 @@ class WeatherRepository @Inject constructor(
     val weatherUIFlow: MutableStateFlow<CurrentWeatherData?> = MutableStateFlow(null)
 
     private var data: CurrentWeatherData? = null
+    private var previousData: CurrentWeatherData? = null
 
     var locationLat: String? = null
     var locationLon: String? = null
@@ -44,8 +46,19 @@ class WeatherRepository @Inject constructor(
     private var locationTimeout: Int = 0
 
     private var firstDownload: Boolean = true
+    private var isInternetAvailable: Boolean = false
+
+    override fun onStatusChanged(status: ConnectivityObserver.Status) {
+        when (status) {
+            ConnectivityObserver.Status.Available -> isInternetAvailable = true
+            ConnectivityObserver.Status.Unavailable -> {}
+            ConnectivityObserver.Status.Losing -> {}
+            ConnectivityObserver.Status.Lost -> isInternetAvailable = false
+        }
+    }
 
     init {
+        internetRepo.subscribeOnInetState(this)
         launch {
             while (true) {
                 if (firstDownload) {
@@ -68,12 +81,25 @@ class WeatherRepository @Inject constructor(
                         description = "no_loc"
                     )
                 } else if (city != null && cityUpdate) {
-                    data = getCurrentWeatherCity(city!!)
+                    if (isInternetAvailable) {
+                        data = getCurrentWeatherCity(city!!)
+                    } else {
+                        previousData = data
+                    }
                 } else if (lat != null && lon != null && locUpdate) {
-                    data = getCurrentWeather(lat!!, lon!!)
+                    if (isInternetAvailable) {
+                        data = getCurrentWeather(lat!!, lon!!)
+                    } else {
+                        previousData = data
+                    }
                 } else {
-                    data = getCurrentWeather(locationLat!!, locationLon!!)
+                    if (isInternetAvailable) {
+                        data = getCurrentWeather(locationLat!!, locationLon!!)
+                    } else {
+                        previousData = data
+                    }
                 }
+                previousData = data
                 weatherUIFlow.emit(data)
                 Log.e("flow", "emited data $data")
                 delay(3_000)
@@ -92,12 +118,25 @@ class WeatherRepository @Inject constructor(
                     description = "no_loc"
                 )
             } else if (city != null && cityUpdate) {
-                data = getCurrentWeatherCity(city!!)
+                if (isInternetAvailable) {
+                    data = getCurrentWeatherCity(city!!)
+                } else {
+                    previousData = data
+                }
             } else if (lat != null && lon != null && locUpdate) {
-                data = getCurrentWeather(lat!!, lon!!)
+                if (isInternetAvailable) {
+                    data = getCurrentWeather(lat!!, lon!!)
+                } else {
+                    previousData = data
+                }
             } else {
-                data = getCurrentWeather(locationLat!!, locationLon!!)
+                if (isInternetAvailable) {
+                    data = getCurrentWeather(locationLat!!, locationLon!!)
+                } else {
+                    previousData = data
+                }
             }
+            previousData = data
             weatherUIFlow.emit(data)
             Log.e("flow", "emited data $data")
         }
@@ -107,71 +146,51 @@ class WeatherRepository @Inject constructor(
         lat: String,
         lon: String
     ): CurrentWeatherData = withContext(Dispatchers.IO) {
-        if (!internetRepo.isOnline()) {
-            return@withContext CurrentWeatherData(
-                name = no_internet,
-                temp = no_internet,
-                humidity = no_internet,
-                description = no_internet,
-                speed = no_internet
-            )
-        } else {
-            val response = retrofit.api.getCurrentWeather(
-                lat = lat,
-                lon = lon,
-                appid = apiKey
-            )
-            return@withContext response.body()?.let { data ->
-                CurrentWeatherData(
-                    temp = Math.round((data.main.temp).toDouble()).toString(),
-                    name = data.name + " " + updateStep,
-                    humidity = data.main.humidity,
-                    description = data.weather[0].description,
-                    speed = data.wind.speed,
+        val response = retrofit.api.getCurrentWeather(
+            lat = lat,
+            lon = lon,
+            appid = apiKey
+        )
+        return@withContext response.body()?.let { data ->
+            CurrentWeatherData(
+                temp = Math.round((data.main.temp).toDouble()).toString(),
+                name = data.name + " " + updateStep,
+                humidity = data.main.humidity,
+                description = data.weather[0].description,
+                speed = data.wind.speed,
 
-                    )
-            } ?: CurrentWeatherData(
-                name = no_data,
-                temp = no_data,
-                humidity = no_data,
-                description = no_data,
-                speed = no_data
-            )
-        }
+                )
+        } ?: CurrentWeatherData(
+            name = no_data,
+            temp = no_data,
+            humidity = no_data,
+            description = no_data,
+            speed = no_data
+        )
     }
 
     suspend fun getCurrentWeatherCity(
         city: String
     ): CurrentWeatherData = withContext(Dispatchers.IO) {
-        if (!internetRepo.isOnline()) {
-            return@withContext CurrentWeatherData(
-                name = no_internet,
-                temp = no_internet,
-                humidity = no_internet,
-                description = no_internet,
-                speed = no_internet
-            )
-        } else {
-            val response = retrofit.api.getCurrentWeatherCity(
-                city = city,
-                appid = apiKey
-            )
-            return@withContext response.body()?.let { data ->
-                CurrentWeatherData(
-                    temp = Math.round((data.main.temp).toDouble()).toString(),
-                    name = data.name + " " + updateStep,
-                    humidity = data.main.humidity,
-                    description = data.weather[0].description,
-                    speed = data.wind.speed,
+        val response = retrofit.api.getCurrentWeatherCity(
+            city = city,
+            appid = apiKey
+        )
+        return@withContext response.body()?.let { data ->
+            CurrentWeatherData(
+                temp = Math.round((data.main.temp).toDouble()).toString(),
+                name = data.name + " " + updateStep,
+                humidity = data.main.humidity,
+                description = data.weather[0].description,
+                speed = data.wind.speed,
 
-                    )
-            } ?: CurrentWeatherData(
-                name = no_data,
-                temp = no_data,
-                humidity = no_data,
-                description = no_data,
-                speed = no_data
-            )
-        }
+                )
+        } ?: CurrentWeatherData(
+            name = no_data,
+            temp = no_data,
+            humidity = no_data,
+            description = no_data,
+            speed = no_data
+        )
     }
 }

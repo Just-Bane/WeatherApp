@@ -1,12 +1,10 @@
-package com.example.composeweatherapp.ui.screens.second
+package com.example.composeweatherapp.ui.screens.home
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.composeweatherapp.core.BaseViewModel
-import com.example.composeweatherapp.core.SomeEvent
-import com.example.composeweatherapp.core.internet_available
-import com.example.composeweatherapp.core.internet_lost
+import com.example.composeweatherapp.repository.internet.ConnectivityObserver
 import com.example.composeweatherapp.repository.internet.InternetRepository
 import com.example.composeweatherapp.repository.weather.WeatherRepository
 import com.example.composeweatherapp.retrofit.CurrentWeatherData
@@ -22,12 +20,17 @@ class HomeViewModel @Inject constructor(
     private val date: DateUseCase,
     private val weatherRepo: WeatherRepository,
     private val internetRepo: InternetRepository
-): BaseViewModel<HomeScreenState, SomeEvent<HomeScreenEvent>, HomeScreenIntent>() {
+): BaseViewModel<HomeScreenState, HomeScreenEvents, HomeScreenIntent>(), InternetRepository.ISubscription {
 
     var weather = mutableStateOf(CurrentWeatherData("", "", "", "", ""))
     val currentDate: String = date.getDate()
 
+    override val defaultState: HomeScreenState = HomeScreenState.Default
+
     init {
+        _viewState.value = defaultState
+
+        internetRepo.subscribeOnInetState(this)
         viewModelScope.launch {
             weatherRepo.weatherUIFlow.collect {
                 withContext(Dispatchers.Main) {
@@ -40,23 +43,69 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    override val defaultState: HomeScreenState = HomeScreenState.Default
+    override fun onStatusChanged(status: ConnectivityObserver.Status) {
+        when(status) {
+            ConnectivityObserver.Status.Available -> {}
+            ConnectivityObserver.Status.Unavailable -> {
+                proceedIntent(HomeScreenIntent.LostInternetIntent)
+            }
+            ConnectivityObserver.Status.Losing -> {}
+            ConnectivityObserver.Status.Lost -> {
+                proceedIntent(HomeScreenIntent.LostInternetIntent)
+            }
+        }
+    }
 
     override fun proceedIntent(intent: HomeScreenIntent) {
         when(intent) {
             HomeScreenIntent.GetWeatherIntent -> {
-                if (internetRepo.isOnline()) {
-                    _viewState.value = HomeScreenState.Default
-                } else {
-                    Log.e("fix", "Its no internet(from isOnline)")
-                    _viewState.value = HomeScreenState.NoInternet
-                }
-                if (internetRepo.networkStatusObserver.value == internet_lost) {
-                    _viewState.value = HomeScreenState.NoInternet
-                }
+//                if (internetRepo.isOnline()) {
+//                    _viewState.value = HomeScreenState.Default
+//                } else {
+//                    Log.e("fix", "Its no internet(from isOnline)")
+//                    _viewState.value = HomeScreenState.NoInternet
+//                }
+//                if (internetRepo.networkStatusObserver.value == internet_lost) {
+//                    _viewState.value = HomeScreenState.NoInternet
+//                }
+            }
+
+            HomeScreenIntent.LostInternetIntent -> {
+                _viewState.value = HomeScreenState.NoInternet
+                _event.value = HomeScreenEvents.NavigateToInternetScreen
             }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        internetRepo.unsubscribeInetState(this)
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

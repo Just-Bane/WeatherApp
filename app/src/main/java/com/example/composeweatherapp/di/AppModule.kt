@@ -1,7 +1,6 @@
 package com.example.composeweatherapp.di
 
 import android.content.Context
-import com.example.composeweatherapp.repository.database.DBRepo
 import com.example.composeweatherapp.repository.internet.InternetRepository
 import com.example.composeweatherapp.repository.weather.WeatherRepository
 import com.example.composeweatherapp.retrofit.RetrofitInit
@@ -26,12 +25,6 @@ class AppModule {
     @Singleton
     fun provideInternetRepo(context: Context): InternetRepository {
         return InternetRepository(context)
-    }
-
-    @Provides
-    @Singleton
-    fun provideDBRepo(context: Context): DBRepo {
-        return DBRepo(context)
     }
 
     @Provides

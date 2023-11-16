@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.ui.screens.third
+package com.example.composeweatherapp.ui.screens.location
 
 sealed class LocationScreenState {
     object WriteTheLocation : LocationScreenState()
@@ -8,9 +8,10 @@ sealed class LocationScreenState {
 }
 
 sealed class LocationScreenIntent {
-    object GetTheWeatherIntent: LocationScreenIntent()
+    object GetWeatherIntent: LocationScreenIntent()
+    object LostInternetIntent: LocationScreenIntent()
 }
 
-enum class LocationScreenEvent {
-    SOME_EVENT
+sealed class LocationScreenEvents {
+    object NavigateToInternetScreen: LocationScreenEvents()
 }

@@ -41,8 +41,7 @@ fun InternetScreen(modifier: Modifier, navController: NavController) {
     val internetViewModel: InternetViewModel = hiltViewModel()
 
     val state = internetViewModel.viewState.collectAsState()
-
-    internetViewModel.proceedIntent(InternetScreenIntent.DefaultIntent)
+    val event = internetViewModel.event.collectAsState()
 
     when (state.value) {
         InternetScreenState.Default -> {
@@ -50,7 +49,6 @@ fun InternetScreen(modifier: Modifier, navController: NavController) {
         }
 
         InternetScreenState.TrueInternet -> {
-            navController.navigate(NavigationScreens.Home.route)
         }
 
         InternetScreenState.FalseInternet -> {
@@ -58,7 +56,12 @@ fun InternetScreen(modifier: Modifier, navController: NavController) {
         }
     }
 
-
+    when (event.value) {
+        InternetScreenEvents.NavigateToHomeScreen -> {
+            navController.navigate(NavigationScreens.Home.route)
+        }
+        null -> {}
+    }
 }
 
 @Composable
@@ -105,7 +108,7 @@ fun InternetScreenUI(modifier: Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
             Button(
                 onClick = {
-                    internetViewModel.proceedIntent(InternetScreenIntent.DefaultIntent)
+                    internetViewModel.proceedIntent(InternetScreenIntent.CheckTheInternetIntent)
                 },
                 colors = ButtonDefaults.buttonColors(boxesColor),
                 shape = RoundedCornerShape(20.dp),

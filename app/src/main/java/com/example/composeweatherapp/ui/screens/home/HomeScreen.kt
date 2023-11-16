@@ -1,5 +1,6 @@
-package com.example.composeweatherapp.ui.screens.second
+package com.example.composeweatherapp.ui.screens.home
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +19,7 @@ import com.example.composeweatherapp.ui.screens.main.BottomNavSection
 import com.example.composeweatherapp.ui.screens.main.BoxesSection
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
+import com.example.composeweatherapp.ui.screens.main.ReconnectionSection
 import com.example.composeweatherapp.ui.screens.main.TemperatureSection
 import com.example.composeweatherapp.ui.screens.main.WeatherUIData
 import com.example.composeweatherapp.ui.theme.gradientColorList
@@ -30,8 +32,7 @@ fun HomeScreen(
     val homeViewModel: HomeViewModel = hiltViewModel()
 
     val state = homeViewModel.viewState.collectAsState()
-
-    homeViewModel.proceedIntent(HomeScreenIntent.GetWeatherIntent)
+    val event = homeViewModel.event.collectAsState()
 
     when (state.value) {
         HomeScreenState.Default -> {
@@ -39,8 +40,15 @@ fun HomeScreen(
         }
 
         HomeScreenState.NoInternet -> {
+            HomeCheckingScreenUI(modifier = modifier, navController = navController)
+        }
+    }
+
+    when (event.value) {
+        HomeScreenEvents.NavigateToInternetScreen -> {
             navController.navigate(NavigationScreens.Internet.route)
         }
+        null -> {}
     }
 }
 
@@ -100,6 +108,64 @@ fun HomeScreenUI(modifier: Modifier, navController: NavHostController) {
         }
     }
 }
+
+@Composable
+fun HomeCheckingScreenUI(modifier: Modifier, navController: NavHostController) {
+
+    val homeViewModel: HomeViewModel = hiltViewModel()
+
+    val locationWeather = homeViewModel.weather
+
+    val context = LocalContext.current
+
+    Surface(
+        modifier.fillMaxSize()
+    ) {
+        Column(
+            modifier
+                .background(
+                    GradientBackgroundBrush(
+                        isVerticalGradient = true,
+                        colors = gradientColorList
+                    )
+                )
+                .fillMaxHeight()
+        ) {
+            LocationSection(
+                city = locationWeather.value.name,
+                time = homeViewModel.currentDate
+            )
+            TemperatureSection(
+                temperature = context.getString(R.string.degrees, locationWeather.value.temp)
+            )
+            BoxesSection(
+                weatherUIData = listOf(
+                    WeatherUIData(
+                        title = context.getString(R.string.wind),
+                        iconId = R.drawable.wind,
+                        weatherData = context.getString(R.string.speed, locationWeather.value.speed)
+                    ),
+                    WeatherUIData(
+                        title = context.getString(R.string.humid),
+                        iconId = R.drawable.humid,
+                        weatherData =  context.getString(R.string.percent, locationWeather.value.humidity)
+                    ),
+                    WeatherUIData(
+                        title = context.getString(R.string.clouds),
+                        iconId = R.drawable.cloud,
+                        weatherData = locationWeather.value.description
+                    )
+                )
+            )
+            ReconnectionSection()
+            Spacer(modifier = Modifier.weight(1f))
+            BottomNavSection(
+                navController = navController
+            )
+        }
+    }
+}
+
 
 
 //@Composable

@@ -1,11 +1,9 @@
-package com.example.composeweatherapp.ui.screens.first
-
-import com.example.composeweatherapp.retrofit.CurrentWeatherData
+package com.example.composeweatherapp.ui.screens.city
 
 sealed class CityScreenState {
     object WriteTheCity : CityScreenState()
 
-    class CorrectCityWritten(weather: CurrentWeatherData) : CityScreenState()
+    object CorrectCityWritten : CityScreenState()
 
     object WrongCityWritten : CityScreenState()
 
@@ -14,8 +12,9 @@ sealed class CityScreenState {
 
 sealed class CityScreenIntent {
     object GetWeatherIntent : CityScreenIntent()
+    object LostInternetIntent: CityScreenIntent()
 }
 
-enum class CityScreenEvents {
-    SOME_EVENT
+sealed class CityScreenEvents {
+    object NavigateToInternetScreen: CityScreenEvents()
 }

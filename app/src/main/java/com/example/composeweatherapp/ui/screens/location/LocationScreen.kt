@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.ui.screens.third
+package com.example.composeweatherapp.ui.screens.location
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -44,6 +44,7 @@ import com.example.composeweatherapp.ui.screens.main.BoxesSection
 import com.example.composeweatherapp.ui.screens.main.EnableDialog
 import com.example.composeweatherapp.ui.screens.main.GradientBackgroundBrush
 import com.example.composeweatherapp.ui.screens.main.LocationSection
+import com.example.composeweatherapp.ui.screens.main.ReconnectionSection
 import com.example.composeweatherapp.ui.screens.main.TemperatureSection
 import com.example.composeweatherapp.ui.screens.main.WeatherUIData
 import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
@@ -55,10 +56,7 @@ fun LocationScreen(modifier: Modifier, navController: NavHostController) {
     val locationViewModel: LocationViewModel = hiltViewModel()
 
     val state = locationViewModel.viewState.collectAsState()
-
-    locationViewModel.isOnlineChecking()
-
-
+    val event = locationViewModel.event.collectAsState()
 
     when (state.value) {
         LocationScreenState.WriteTheLocation -> {
@@ -76,8 +74,15 @@ fun LocationScreen(modifier: Modifier, navController: NavHostController) {
         }
 
         LocationScreenState.NoInternet -> {
+            LocationCheckingScreenUI(modifier = Modifier, navController = navController)
+        }
+    }
+
+    when (event.value) {
+        LocationScreenEvents.NavigateToInternetScreen -> {
             navController.navigate(NavigationScreens.Internet.route)
         }
+        null -> {}
     }
 }
 
@@ -214,7 +219,7 @@ fun PrintLatLonSection() {
                 onClick = {
                     locationViewModel.latFromUI = textLat
                     locationViewModel.lonFromUI = textLon
-                    locationViewModel.proceedIntent(LocationScreenIntent.GetTheWeatherIntent)
+                    locationViewModel.proceedIntent(LocationScreenIntent.GetWeatherIntent)
                 },
                 modifier = Modifier.background(
                     color = Color.White,
@@ -227,9 +232,17 @@ fun PrintLatLonSection() {
     }
 }
 
-
 @Composable
-fun ThirdScreenCheck(modifier: Modifier) {
+fun LocationCheckingScreenUI(
+    modifier: Modifier,
+    navController: NavHostController
+) {
+    val locationViewModel: LocationViewModel = hiltViewModel()
+
+    val locationWeather = locationViewModel.weather
+
+    val context = LocalContext.current
+
     Surface(
         modifier.fillMaxSize()
     ) {
@@ -242,40 +255,39 @@ fun ThirdScreenCheck(modifier: Modifier) {
             )
         ) {
             LocationSection(
-                city = "Berdychiv",
-                time = "10.10"
+                city = locationWeather.value.name,
+                time = locationViewModel.currentDate
             )
             TemperatureSection(
-                temperature = "10"
+                temperature = context.getString(R.string.degrees, locationWeather.value.temp)
             )
             BoxesSection(
                 weatherUIData = listOf(
                     WeatherUIData(
-                        title = "Wind",
+                        title = context.getString(R.string.wind),
                         iconId = R.drawable.wind,
-                        weatherData = "15 km/h"
+                        weatherData = context.getString(R.string.speed, locationWeather.value.speed)
                     ),
                     WeatherUIData(
-                        title = "Humidity",
+                        title = context.getString(R.string.humid),
                         iconId = R.drawable.humid,
-                        weatherData = "70 %"
+                        weatherData = locationWeather.value.humidity + " %"
                     ),
                     WeatherUIData(
-                        title = "Clouds",
+                        title = context.getString(R.string.clouds),
                         iconId = R.drawable.cloud,
-                        weatherData = "rain"
+                        weatherData = locationWeather.value.description
                     )
                 )
             )
             PrintLatLonSection()
+            Spacer(modifier = Modifier.height(4.dp))
+            ReconnectionSection()
+            Spacer(modifier = Modifier.weight(1f))
+            BottomNavSection(
+                navController = navController
+            )
         }
     }
 }
 
-@Preview
-@Composable
-fun FirstScreenPreview() {
-    ComposeWeatherAppTheme {
-        ThirdScreenCheck(modifier = Modifier)
-    }
-}

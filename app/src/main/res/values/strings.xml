@@ -6,7 +6,7 @@
     <string name="speed">%s km/h</string>
 
     <string name="humid">Humidity</string>
-    <string name="percent">%s %</string>
+    <string name="percent">%s %%</string>
 
     <string name="clouds">Clouds</string>
 

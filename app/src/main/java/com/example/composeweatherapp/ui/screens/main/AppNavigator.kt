@@ -1,5 +1,3 @@
-
-
 package com.example.composeweatherapp.ui.screens.main
 
 import android.annotation.SuppressLint
@@ -21,7 +19,6 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,12 +50,12 @@ import com.example.composeweatherapp.core.CITY_SCREEN
 import com.example.composeweatherapp.core.LOCATION_SCREEN
 import com.example.composeweatherapp.ui.nav.BottomBarScreen
 import com.example.composeweatherapp.ui.nav.NavigationScreens
-import com.example.composeweatherapp.ui.screens.first.CityScreen
-import com.example.composeweatherapp.ui.screens.first.CityViewModel
+import com.example.composeweatherapp.ui.screens.city.CityScreen
+import com.example.composeweatherapp.ui.screens.city.CityViewModel
 import com.example.composeweatherapp.ui.screens.internet.InternetScreen
-import com.example.composeweatherapp.ui.screens.second.HomeScreen
-import com.example.composeweatherapp.ui.screens.third.LocationScreen
-import com.example.composeweatherapp.ui.screens.third.LocationViewModel
+import com.example.composeweatherapp.ui.screens.home.HomeScreen
+import com.example.composeweatherapp.ui.screens.location.LocationScreen
+import com.example.composeweatherapp.ui.screens.location.LocationViewModel
 import com.example.composeweatherapp.ui.theme.bottomBarColor
 import com.example.composeweatherapp.ui.theme.boxesColor
 
@@ -373,6 +370,25 @@ fun RowScope.AddItem(
                 restoreState = true
             }
         }
+    )
+}
+
+@Composable
+fun ReconnectionSection() {
+    val fontFamily = FontFamily(
+        Font(R.font.montserrat_light, FontWeight.Light),
+        Font(R.font.montserrat_medium, FontWeight.Medium),
+        Font(R.font.montserrat_bold, FontWeight.Bold)
+    )
+
+    Text(
+        text = "Reconnecting",
+        style = TextStyle(
+            fontSize = 10.sp,
+            fontFamily = fontFamily,
+            fontWeight = FontWeight.Light,
+            color = Color(0xFF9A938C)
+        )
     )
 }
 

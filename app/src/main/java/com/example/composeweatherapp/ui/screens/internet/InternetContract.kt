@@ -7,9 +7,9 @@ sealed class InternetScreenState {
 }
 
 sealed class InternetScreenIntent {
-    object DefaultIntent: InternetScreenIntent()
+    object CheckTheInternetIntent: InternetScreenIntent()
 }
 
-enum class InternetScreenEvent {
-    SOME_EVENT
+sealed class InternetScreenEvents {
+    object NavigateToHomeScreen: InternetScreenEvents()
 }

@@ -1,4 +1,4 @@
-package com.example.composeweatherapp.ui.screens.second
+package com.example.composeweatherapp.ui.screens.home
 
 sealed class HomeScreenState {
     object Default: HomeScreenState()
@@ -7,8 +7,9 @@ sealed class HomeScreenState {
 
 sealed class HomeScreenIntent {
     object GetWeatherIntent : HomeScreenIntent()
+    object LostInternetIntent : HomeScreenIntent()
 }
 
-enum class HomeScreenEvent {
-    SOME_EVENT
+sealed class HomeScreenEvents {
+    object NavigateToInternetScreen: HomeScreenEvents()
 }
