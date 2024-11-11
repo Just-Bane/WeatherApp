@@ -1,9 +1,9 @@
 package com.example.composeweatherapp.di
 
 import android.content.Context
-import com.example.composeweatherapp.repository.internet.InternetRepository
-import com.example.composeweatherapp.repository.weather.WeatherRepository
-import com.example.composeweatherapp.retrofit.RetrofitInit
+import com.example.composeweatherapp.domain.repository.internet.InternetRepository
+import com.example.composeweatherapp.domain.repository.weather.WeatherRepository
+import com.example.composeweatherapp.data.network.RetrofitInit
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

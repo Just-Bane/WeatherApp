@@ -4,9 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.ui.Modifier
-import com.example.composeweatherapp.ui.screens.main.AppNavigator
-import com.example.composeweatherapp.ui.theme.ComposeWeatherAppTheme
-import com.example.composeweatherapp.usecase.RequestUseCase
+import com.example.composeweatherapp.presentation.screens.main.AppNavigator
+import com.example.composeweatherapp.presentation.theme.ComposeWeatherAppTheme
+import com.example.composeweatherapp.domain.usecase.RequestUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
